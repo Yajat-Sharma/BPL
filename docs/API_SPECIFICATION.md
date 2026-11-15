@@ -75,15 +75,6 @@
       "custom_commentary": "Optional text"
     }
     ```
-  - **Delivery Event Behaviors**:
-    - `NO_BALL`: +1 run to batting score, extras["no_ball"] + 1, legal delivery = False, repeat delivery = True. Plus any `completed_runs` run off the bat.
-    - `FOUR_D`: Fixed 4 runs awarded. `completed_runs` is ignored (no physical running allowed on 4D). Legal delivery = True.
-    - `ONE_D`: 1 zone run + `completed_runs`. Legal delivery = True.
-    - `TWO_D`: 2 zone runs + `completed_runs`. Legal delivery = True.
-    - `RUNS_COMPLETED`: `completed_runs` added to score. Legal delivery = True.
-    - `DIRECT_OUT`: Wicket recorded (`DIRECT_OUT`), legal delivery = True.
-    - `WICKET`: Standard dismissal recorded with `wicket_type`, legal delivery = True.
-    - `WIDE`: +1 extra run, legal delivery = False, repeat delivery = True.
 - `POST /api/v1/scoring/undo/{match_id}`
   - Reverts the most recent delivery, rolls back scorecards and innings state from snapshot, and broadcasts updated state to WebSockets.
 - `POST /api/v1/scoring/switch-bowler/{match_id}`
@@ -92,6 +83,10 @@
   - Body: `{ "batsman_id": "<uuid>" }`
 - `POST /api/v1/scoring/swap-strike/{match_id}`
   - Manually interchanges striker and non-striker ends.
+- `POST /api/v1/matches/{match_id}/end-innings`
+  - Confirms completion of 1st innings and prepares 2nd innings target.
+- `POST /api/v1/matches/{match_id}/end-match`
+  - Confirms conclusion of match and records winner and margin.
 
 ### 4.2 Super Admin Management (Super Admin Role Required)
 - `POST /api/v1/teams`
@@ -103,6 +98,9 @@
   - Manual fixture scheduler.
 - `POST /api/v1/matches/generate-round-robin`
   - Automatically generates all 28 single round-robin fixtures for the 8 franchises.
+- `PUT /api/v1/users/{user_id}/role`
+  - Body: `{ "role": "SCORER" | "SUPER_ADMIN" | "USER" }`
+  - Manages scorer account delegation.
 - `PUT /api/v1/settings`
   - Configures tournament settings & BPL ground rules:
     ```json
@@ -137,3 +135,4 @@
 - Spectators connect with no authorization required.
 - WebSocket automatically broadcasts whenever a ball is recorded, a zone is struck, an extra is conceded, or a delivery is undone.
 - Payload includes full scoreboard state, active batters, bowling spell, and recent ball badge labels (`1D`, `2D`, `4D`, `1nb`, `1wd`, `OUT`).
+- Scorer client receives acknowledgment and triggers haptic/visual confirmation.

@@ -2,16 +2,16 @@
 
 ## 1. Phased Development Roadmap
 
-The development of the platform is divided into 9 independent, verifiable phases aligned with the confirmed BPL ground scoring rules (**defined square, NO overhead net, zones 1D/2D/4D, fixed 4, line no-balls, direct out of square dismissal, zone precedence safeguard**).
+The development of the platform is divided into 9 independent, verifiable phases aligned with the confirmed BPL ground scoring rules (**defined square, NO overhead net, zones 1D/2D/4D, fixed 4, line no-balls, direct out of square dismissal, zone precedence safeguard**) and the **differentiated device strategy** (Mobile-First for Spectators, Desktop/Tablet-First for Scorers & Admins).
 
 ```mermaid
 gantt
-    title BPL Implementation Roadmap (Confirmed Scoring Rules Aligned)
+    title BPL Implementation Roadmap (Device Strategy & Ground Rules Aligned)
     dateFormat  YYYY-MM-DD
     section Phase 1: Architecture & Foundation
     Database Schema & Migrations       :done, p1, 2026-11-15, 1d
     section Phase 2: Auth & Role Control
-    Email OTP & JWT Roles             :done, p2, 2026-11-15, 1d
+    Email OTP, JWT & Scorer Roles     :done, p2, 2026-11-15, 1d
     section Phase 3: Franchise & Squads
     8 Teams & User ID Squad Building   :done, p3, 2026-11-15, 1d
     section Phase 4: Round-Robin Engine
@@ -20,12 +20,12 @@ gantt
     Scoring Engine & Micro-Snapshots   :done, p5, 2026-11-15, 1d
     section Phase 6: Real-Time Stream
     WebSocket Broadcast & Auto-Sync    :done, p6, 2026-11-15, 1d
-    section Phase 7: Public Web Portal
-    Public Cricbuzz-Style UI           :done, p7, 2026-11-15, 1d
+    section Phase 7: Responsive UIs
+    Mobile-First Spectator & Desktop Scorer :done, p7, 2026-11-15, 1d
     section Phase 8: Standings & Caps
     Automated NRR, Orange & Purple Cap :done, p8, 2026-11-15, 1d
-    section Phase 9: Verification & Docs
-    Seed Data, Test Suites & Docs      :done, p9, 2026-11-15, 1d
+    section Phase 9: PWA, SEO & Verification
+    PWA Manifest, SEO Tags & Test Suites:done, p9, 2026-11-15, 1d
 ```
 
 ---
@@ -71,25 +71,26 @@ gantt
 ### Phase 6: WebSocket Real-Time Broadcasting
 - [x] Channel manager `/ws/matches/{match_id}`.
 - [x] Automated delivery and undo delta broadcast without page refresh.
-- [x] Resilient frontend WebSocket hook with auto-reconnection.
+- [x] Resilient frontend WebSocket hook with auto-reconnection and state hydration.
 
-### Phase 7: Public Web Experience
-- [x] Professional cricket visual identity with Deep Emerald Green & Golden Yellow accents.
-- [x] Public homepage with prominent Live Match Card, upcoming fixtures, and cap leaders.
-- [x] Ball-by-ball live match commentary and full interactive digital scorecards.
-- [x] Scorer control pad equipped with 1D, 2D, 4D (Fixed 4), Line NB, Direct Out, and Undo buttons.
-- [x] Responsive layout optimized for mobile smartphones, tablets, and desktop displays.
+### Phase 7: Differentiated UI Implementation
+- [x] **Mobile-First Spectator Web App**: Compact match ticker, thumb-friendly navigation, rapid scorecard toggle, and zero authentication walls.
+- [x] **Desktop/Tablet Scorer Console (`1366px+` & iPad)**: Non-scrolling 6-zone dashboard, double-click debounce protection, hardware keyboard shortcuts (`0`, `1`, `2`, `4`, `N`, `W`, `Z`), and end-of-innings confirmation modal.
+- [x] **Desktop/Tablet Super Admin Portal**: Franchise squad builder, 28-match fixture table, and box cricket regulations editor.
 
 ### Phase 8: Automated Standings & Player Caps
 - [x] Net Run Rate (NRR) dynamically re-computed across all completed matches.
 - [x] Standings table with positions, wins, losses, ties, points, and Top-4 qualification markers.
 - [x] Individual leaderboards: Orange Cap (leading run scorer) and Purple Cap (top wicket taker).
 
-### Phase 9: Testing & Documentation
-- [x] Unit test suites for zone scoring, line no-balls, direct out of square dismissals, and rollback undo.
-- [x] Verified and committed architectural documentation in `docs/`:
+### Phase 9: PWA, SEO & Documentation
+- [x] Web App Manifest (`manifest.json`) for standalone spectator PWA installation.
+- [x] Network-only live score policy (stale scores never served from service worker cache).
+- [x] Dynamic Open Graph preview cards, `robots.txt`, and Schema.org `SportsEvent` structured data.
+- [x] Architecture documentation complete in `docs/`:
   - `docs/ARCHITECTURE.md`
   - `docs/DATABASE_SCHEMA.md`
   - `docs/API_SPECIFICATION.md`
   - `docs/SCORING_ENGINE.md`
+  - `docs/MOBILE_PWA_SEO.md`
   - `docs/IMPLEMENTATION_ROADMAP.md`

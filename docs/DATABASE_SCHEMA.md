@@ -8,7 +8,8 @@ Key Principles:
 1. **Explicit Delivery Event Types**: The `ball_events` table explicitly tracks the confirmed BPL delivery types: `NO_BALL`, `DIRECT_OUT`, `ONE_D`, `TWO_D`, `FOUR_D`, `RUNS_COMPLETED`, `WIDE`, and `WICKET`.
 2. **Deterministic Micro-Snapshots**: Every `ball_events` row stores `previous_state_snapshot` (JSONB) capturing the exact micro-state of both scorecards and innings before the delivery occurred, enabling instant and bug-free undo.
 3. **Fixed 4 vs Running Runs**: `FOUR_D` deliveries record `fixed_runs = 4` with `completed_runs = 0`. `ONE_D` and `TWO_D` record zone runs plus any physically completed running runs.
-4. **Referential Integrity**: Strict foreign keys and constraints prevent orphan scoring events or invalid team assignments.
+4. **Scorer Account Authorization**: The `users.role` enum includes `SCORER` in addition to `SUPER_ADMIN`, `CAPTAIN`, and `USER`.
+5. **Referential Integrity**: Strict foreign keys and constraints prevent orphan scoring events or invalid team assignments.
 
 ---
 
