@@ -2,11 +2,11 @@
 
 ## 1. Phased Development Roadmap
 
-The development of the platform is divided into 9 independent, verifiable phases aligned with the official BPL ground configuration (**defined square, NO overhead net, zones 1D/2D/4, line no-balls, direct out of square dismissal**).
+The development of the platform is divided into 9 independent, verifiable phases aligned with the confirmed BPL ground scoring rules (**defined square, NO overhead net, zones 1D/2D/4D, fixed 4, line no-balls, direct out of square dismissal, zone precedence safeguard**).
 
 ```mermaid
 gantt
-    title BPL Implementation Roadmap (Ground Rules Aligned)
+    title BPL Implementation Roadmap (Confirmed Scoring Rules Aligned)
     dateFormat  YYYY-MM-DD
     section Phase 1: Architecture & Foundation
     Database Schema & Migrations       :done, p1, 2026-11-15, 1d
@@ -36,7 +36,7 @@ gantt
 - [x] SQLAlchemy 2.0 models reflecting BPL ground rules: `users`, `teams`, `team_players`, `matches`, `match_innings`, `batting_scorecards`, `bowling_scorecards`, `ball_events`, and `tournament_settings`.
 - [x] Constraints: Unique `BPLxxx` user IDs, unique team short codes, single team membership per resident.
 - [x] Removed all overhead net columns and rules.
-- [x] Added dedicated scoring zones (`ZONE_1D`, `ZONE_2D`, `ZONE_4`) and dismissal `DIRECT_OUT_OF_SQUARE`.
+- [x] Delivery event types: `NO_BALL`, `DIRECT_OUT`, `ONE_D`, `TWO_D`, `FOUR_D`, `RUNS_COMPLETED`, `WIDE`, `WICKET`.
 
 ### Phase 2: Authentication & Permissions System
 - [x] Email OTP verification service (no passwords).
@@ -57,12 +57,15 @@ gantt
 - [x] Match lifecycle progression (`UPCOMING` -> `LIVE` -> `COMPLETED`).
 
 ### Phase 5: BPL Ground Scoring Engine & Rules
-- [x] Configurable overs per match, players per team, and wickets allowed.
-- [x] BPL scoring zones: Zone 1D (1 run), Zone 2D (2 runs), Zone 4 (4 runs).
-- [x] Physical runs tracking: Striker and non-striker can run additional runs.
-- [x] Strike rotation on odd physical runs completed and at end of each 6-ball over.
-- [x] Line no-ball: +1 extra run, ball is re-bowled, not counted as legal, and recorded separately in bowling & batting scorecards.
-- [x] Dismissal `DIRECT_OUT_OF_SQUARE`: Ball hit directly out of the square without bouncing.
+- [x] Confirmed Delivery Types & Rules:
+  - `NO_BALL`: +1 run to batting team, repeated delivery, does NOT count as legal ball.
+  - `FOUR_D`: FIXED 4 runs awarded. Additional running runs omitted.
+  - `ONE_D`: 1 zone run + physically completed runs.
+  - `TWO_D`: 2 zone runs + physically completed runs.
+  - `RUNS_COMPLETED`: Physically completed runs between wickets.
+  - `DIRECT_OUT`: Ball directly out of square = OUT (legal ball).
+  - `Zone Precedence Safeguard`: 1D, 2D, and 4D zones take precedence before checking direct square boundary exit.
+- [x] Strike rotation on odd physical runs and at end of each 6-ball over.
 - [x] **Deterministic Undo**: Micro-snapshots of innings and scorecard state restored atomically on demand.
 
 ### Phase 6: WebSocket Real-Time Broadcasting
@@ -74,7 +77,7 @@ gantt
 - [x] Professional cricket visual identity with Deep Emerald Green & Golden Yellow accents.
 - [x] Public homepage with prominent Live Match Card, upcoming fixtures, and cap leaders.
 - [x] Ball-by-ball live match commentary and full interactive digital scorecards.
-- [x] Scorer control pad equipped with 1D, 2D, 4, Line NB, Wide, Out of Square, and Undo buttons.
+- [x] Scorer control pad equipped with 1D, 2D, 4D (Fixed 4), Line NB, Direct Out, and Undo buttons.
 - [x] Responsive layout optimized for mobile smartphones, tablets, and desktop displays.
 
 ### Phase 8: Automated Standings & Player Caps
@@ -84,7 +87,7 @@ gantt
 
 ### Phase 9: Testing & Documentation
 - [x] Unit test suites for zone scoring, line no-balls, direct out of square dismissals, and rollback undo.
-- [x] Updated architectural documentation in `docs/`:
+- [x] Verified and committed architectural documentation in `docs/`:
   - `docs/ARCHITECTURE.md`
   - `docs/DATABASE_SCHEMA.md`
   - `docs/API_SPECIFICATION.md`

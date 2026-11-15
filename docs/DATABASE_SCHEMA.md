@@ -2,12 +2,12 @@
 
 ## 1. Schema Design Principles
 
-The BPL database schema models an **open-air box cricket ground with a defined playing square and designated scoring zones (1D, 2D, 4)**. Overhead net assumptions have been removed.
+The BPL database schema models an **open-air box cricket ground with a defined playing square, NO overhead net, designated scoring zones (1D, 2D, 4D), line no-balls, and direct out-of-square dismissals**.
 
 Key Principles:
-1. **UUID Primary Keys**: Prevents enumeration attacks and guarantees cross-system uniqueness.
+1. **Explicit Delivery Event Types**: The `ball_events` table explicitly tracks the confirmed BPL delivery types: `NO_BALL`, `DIRECT_OUT`, `ONE_D`, `TWO_D`, `FOUR_D`, `RUNS_COMPLETED`, `WIDE`, and `WICKET`.
 2. **Deterministic Micro-Snapshots**: Every `ball_events` row stores `previous_state_snapshot` (JSONB) capturing the exact micro-state of both scorecards and innings before the delivery occurred, enabling instant and bug-free undo.
-3. **Dedicated Scoring Zones & Extras**: The `ball_events` table explicitly tracks declared zone runs (`ZONE_1D`, `ZONE_2D`, `ZONE_4`), physical runs completed, and line no-ball extras.
+3. **Fixed 4 vs Running Runs**: `FOUR_D` deliveries record `fixed_runs = 4` with `completed_runs = 0`. `ONE_D` and `TWO_D` record zone runs plus any physically completed running runs.
 4. **Referential Integrity**: Strict foreign keys and constraints prevent orphan scoring events or invalid team assignments.
 
 ---
@@ -87,8 +87,9 @@ erDiagram
         boolean wide_reball "Default TRUE"
         int zone_1d_runs "Default 1"
         int zone_2d_runs "Default 2"
-        int zone_4_runs "Default 4"
-        boolean direct_out_of_square_enabled "Default TRUE"
+        int zone_4d_runs "Default 4"
+        boolean zone_precedence_enabled "Default TRUE"
+        boolean direct_out_enabled "Default TRUE"
         boolean allow_lbw "Default FALSE"
         int over_limit_per_bowler "Default 2"
         varchar status "UPCOMING | LIVE | COMPLETED"
@@ -174,15 +175,14 @@ erDiagram
         uuid bowler_id FK
         uuid striker_id FK
         uuid non_striker_id FK
-        varchar scoring_zone "NONE | ZONE_1D | ZONE_2D | ZONE_4"
-        int physical_runs "Runs physically run by batsmen"
-        int runs_scored "Total off-bat runs: zone + physical"
-        varchar extra_type "NONE | WIDE | NO_BALL | BYE | LEG_BYE | PENALTY"
-        int extra_runs "Extra penalty runs"
-        int total_ball_runs "runs_scored + extra_runs"
-        boolean is_legal_delivery
+        varchar event_type "NO_BALL | DIRECT_OUT | ONE_D | TWO_D | FOUR_D | RUNS_COMPLETED | WIDE | WICKET"
+        int completed_runs "Running runs completed between wickets"
+        int zone_runs "Fixed or designated zone runs (1, 2, or 4)"
+        int total_ball_runs "Total runs added to team score"
+        boolean is_legal_delivery "False for NO_BALL and WIDE"
+        boolean repeat_delivery "True for NO_BALL and WIDE"
         boolean is_wicket
-        varchar wicket_type "BOWLED | CAUGHT | LBW | RUN_OUT | STUMPED | HIT_WICKET | DIRECT_OUT_OF_SQUARE"
+        varchar dismissal_type "DIRECT_OUT | BOWLED | CAUGHT | RUN_OUT | STUMPED | HIT_WICKET | LBW"
         uuid dismissed_player_id FK
         uuid fielder_id FK
         text commentary
@@ -199,19 +199,20 @@ erDiagram
 | Column | Type | Constraints | Description |
 | :--- | :--- | :--- | :--- |
 | `id` | INT | PRIMARY KEY | Settings row identifier |
-| `tournament_name` | VARCHAR(150) | NOT NULL | Official name |
+| `tournament_name` | VARCHAR(150) | NOT NULL | Official tournament name |
 | `overs_per_match` | INT | DEFAULT 6 | Customizable match overs |
 | `players_per_team` | INT | DEFAULT 8 | Box cricket squad size |
 | `max_wickets` | INT | DEFAULT 7 | Wickets allowed before all out |
 | `allow_last_man_batting` | BOOLEAN | DEFAULT FALSE | Last man can bat alone toggle |
 | `wide_runs` | INT | DEFAULT 1 | Runs awarded for wide |
-| `no_ball_runs` | INT | DEFAULT 1 | Runs awarded for line no-ball |
-| `no_ball_reball` | BOOLEAN | DEFAULT TRUE | Line no-balls re-bowled |
-| `wide_reball` | BOOLEAN | DEFAULT TRUE | Wides re-bowled |
-| `zone_1d_runs` | INT | DEFAULT 1 | Declared runs for Zone 1D |
-| `zone_2d_runs` | INT | DEFAULT 2 | Declared runs for Zone 2D |
-| `zone_4_runs` | INT | DEFAULT 4 | Declared runs for Zone 4 |
-| `direct_out_of_square_enabled` | BOOLEAN | DEFAULT TRUE | Out if hit directly outside square |
+| `no_ball_runs` | INT | DEFAULT 1 | Runs awarded for line no-ball (+1) |
+| `no_ball_reball` | BOOLEAN | DEFAULT TRUE | Line no-balls repeated |
+| `wide_reball` | BOOLEAN | DEFAULT TRUE | Wides repeated |
+| `zone_1d_runs` | INT | DEFAULT 1 | Runs for Zone 1D |
+| `zone_2d_runs` | INT | DEFAULT 2 | Runs for Zone 2D |
+| `zone_4d_runs` | INT | DEFAULT 4 | Runs for Zone 4D (Fixed 4) |
+| `zone_precedence_enabled`| BOOLEAN | DEFAULT TRUE | 1D/2D/4D zones take precedence over square exits |
+| `direct_out_enabled` | BOOLEAN | DEFAULT TRUE | Out if hit directly outside square |
 | `allow_lbw` | BOOLEAN | DEFAULT FALSE | Disabled by default |
 | `over_limit_per_bowler` | INT | DEFAULT 2 | Max overs per bowler |
 | `status` | VARCHAR(50) | DEFAULT 'UPCOMING' | `UPCOMING`, `LIVE`, `COMPLETED` |
@@ -229,17 +230,17 @@ erDiagram
 | `bowler_id` | UUID | FOREIGN KEY, NOT NULL | Active bowler |
 | `striker_id` | UUID | FOREIGN KEY, NOT NULL | Active striker |
 | `non_striker_id` | UUID | FOREIGN KEY, NULLABLE | Active non-striker (null for last-man) |
-| `scoring_zone` | VARCHAR(20) | DEFAULT 'NONE' | `NONE`, `ZONE_1D`, `ZONE_2D`, `ZONE_4` |
-| `physical_runs` | INT | DEFAULT 0 | Physical runs completed between wickets |
-| `runs_scored` | INT | DEFAULT 0 | Off-bat total (zone + physical runs) |
-| `extra_type` | VARCHAR(20) | DEFAULT 'NONE' | `NONE`, `WIDE`, `NO_BALL`, `BYE`, `LEG_BYE`, `PENALTY` |
-| `extra_runs` | INT | DEFAULT 0 | Extra runs from penalties |
-| `total_ball_runs` | INT | DEFAULT 0 | Total runs credited on delivery |
-| `is_legal_delivery` | BOOLEAN | DEFAULT TRUE | False for wide or no-ball |
+| `event_type` | VARCHAR(30) | NOT NULL | `NO_BALL`, `DIRECT_OUT`, `ONE_D`, `TWO_D`, `FOUR_D`, `RUNS_COMPLETED`, `WIDE`, `WICKET` |
+| `completed_runs` | INT | DEFAULT 0 | Physical runs run between wickets |
+| `zone_runs` | INT | DEFAULT 0 | Declared zone runs (1 for 1D, 2 for 2D, 4 for 4D) |
+| `total_ball_runs` | INT | DEFAULT 0 | Total runs credited on this delivery |
+| `is_legal_delivery` | BOOLEAN | DEFAULT TRUE | False for `NO_BALL` or `WIDE` |
+| `repeat_delivery` | BOOLEAN | DEFAULT FALSE | True for `NO_BALL` or `WIDE` |
 | `is_wicket` | BOOLEAN | DEFAULT FALSE | Wicket indicator |
-| `wicket_type` | VARCHAR(50) | NULLABLE | `BOWLED`, `CAUGHT`, `LBW`, `RUN_OUT`, `STUMPED`, `HIT_WICKET`, `DIRECT_OUT_OF_SQUARE` |
+| `dismissal_type` | VARCHAR(50) | NULLABLE | `DIRECT_OUT`, `BOWLED`, `CAUGHT`, `RUN_OUT`, `STUMPED`, `HIT_WICKET`, `LBW` |
 | `dismissed_player_id` | UUID | FOREIGN KEY, NULLABLE | Dismissed batsman |
 | `previous_state_snapshot`| JSONB | NOT NULL | Exact serialized JSON state for atomic undo |
 
 *Indexes*:
 - `idx_ball_events_innings_seq` ON (`innings_id`, `ball_sequence` DESC)
+- `idx_ball_events_event_type` ON (`event_type`)
