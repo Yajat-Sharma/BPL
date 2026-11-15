@@ -2,13 +2,13 @@
 
 ## 1. Schema Design Principles
 
-The BPL database schema is designed to model **residential box cricket** with strict referential integrity, event-sourcing for deliveries, and high-performance indexing for live queries.
+The BPL database schema models an **open-air box cricket ground with a defined playing square and designated scoring zones (1D, 2D, 4)**. Overhead net assumptions have been removed.
 
 Key Principles:
-1. **UUID Primary Keys**: Prevents enumeration attacks and simplifies distributed synchronization.
-2. **Immutable Ball Events**: Every ball delivered in an innings is appended as an immutable event record.
-3. **State Snapshotting**: Every `ball_events` row contains `previous_state_snapshot` (JSONB) capturing the exact micro-state of both scorecards and innings before the delivery occurred, enabling instant and bug-free undo.
-4. **Configurable Box Cricket Regulations**: The `tournament_settings` table stores all customizable rules (overs, bowler quotas, net hits, wall runs, wickets allowed).
+1. **UUID Primary Keys**: Prevents enumeration attacks and guarantees cross-system uniqueness.
+2. **Deterministic Micro-Snapshots**: Every `ball_events` row stores `previous_state_snapshot` (JSONB) capturing the exact micro-state of both scorecards and innings before the delivery occurred, enabling instant and bug-free undo.
+3. **Dedicated Scoring Zones & Extras**: The `ball_events` table explicitly tracks declared zone runs (`ZONE_1D`, `ZONE_2D`, `ZONE_4`), physical runs completed, and line no-ball extras.
+4. **Referential Integrity**: Strict foreign keys and constraints prevent orphan scoring events or invalid team assignments.
 
 ---
 
@@ -81,14 +81,16 @@ erDiagram
         int players_per_team "Default 8"
         int max_wickets "Default 7"
         boolean allow_last_man_batting
-        int wide_runs
-        int no_ball_runs
-        boolean no_ball_reball
-        boolean wide_reball
-        varchar roof_net_hit_rule "DEAD_BALL | RUNS_1 | RUNS_2 | OUT"
-        varchar direct_hit_wall_rule "RUNS_4 | RUNS_6 | RUN_PHYSICALLY"
-        boolean allow_lbw
-        int over_limit_per_bowler
+        int wide_runs "Default 1"
+        int no_ball_runs "Default 1"
+        boolean no_ball_reball "Default TRUE"
+        boolean wide_reball "Default TRUE"
+        int zone_1d_runs "Default 1"
+        int zone_2d_runs "Default 2"
+        int zone_4_runs "Default 4"
+        boolean direct_out_of_square_enabled "Default TRUE"
+        boolean allow_lbw "Default FALSE"
+        int over_limit_per_bowler "Default 2"
         varchar status "UPCOMING | LIVE | COMPLETED"
         timestamp updated_at
     }
@@ -172,13 +174,15 @@ erDiagram
         uuid bowler_id FK
         uuid striker_id FK
         uuid non_striker_id FK
-        int runs_scored
-        varchar extra_type "NONE | WIDE | NO_BALL | BYE | LEG_BYE | ROOF_NET_HIT | WALL_HIT"
-        int extra_runs
-        int total_ball_runs
+        varchar scoring_zone "NONE | ZONE_1D | ZONE_2D | ZONE_4"
+        int physical_runs "Runs physically run by batsmen"
+        int runs_scored "Total off-bat runs: zone + physical"
+        varchar extra_type "NONE | WIDE | NO_BALL | BYE | LEG_BYE | PENALTY"
+        int extra_runs "Extra penalty runs"
+        int total_ball_runs "runs_scored + extra_runs"
         boolean is_legal_delivery
         boolean is_wicket
-        varchar wicket_type
+        varchar wicket_type "BOWLED | CAUGHT | LBW | RUN_OUT | STUMPED | HIT_WICKET | DIRECT_OUT_OF_SQUARE"
         uuid dismissed_player_id FK
         uuid fielder_id FK
         text commentary
@@ -189,49 +193,53 @@ erDiagram
 
 ---
 
-## 3. Detailed Table Specifications & Constraints
+## 3. Key Table Specifications & Constraints
 
-### 3.1 `users`
+### 3.1 `tournament_settings`
 | Column | Type | Constraints | Description |
 | :--- | :--- | :--- | :--- |
-| `id` | UUID | PRIMARY KEY | Internal unique identifier |
-| `user_id` | VARCHAR(20) | UNIQUE, NOT NULL | Public ID: `BPL001`, `BPL002`... |
-| `username` | VARCHAR(100) | NOT NULL | Full name of resident |
-| `email` | VARCHAR(255) | UNIQUE, NOT NULL | Gmail address |
-| `role` | VARCHAR(20) | NOT NULL, DEFAULT 'USER' | `SUPER_ADMIN`, `SCORER`, `CAPTAIN`, `USER` |
-| `is_active` | BOOLEAN | DEFAULT TRUE | Account state |
-| `created_at` | TIMESTAMP WITH TIME ZONE | DEFAULT CURRENT_TIMESTAMP | Registration timestamp |
-
-*Indexes*:
-- `idx_users_user_id` (BTREE)
-- `idx_users_email` (BTREE)
-
----
-
-### 3.2 `teams` & `team_players`
-- `teams.name` UNIQUE, `teams.short_code` UNIQUE (Max 8 franchises).
-- `team_players.user_id` UNIQUE: **Guarantees no player can be assigned to multiple teams**.
-- Foreign Keys configured with `ON DELETE CASCADE` for team player records when a team is removed.
-
----
-
-### 3.3 `matches`
-- `match_number` VARCHAR(20) UNIQUE (e.g. `M01` through `M28`).
-- `overs_per_innings` INT: Inherited from tournament settings or overridden per match.
-- `status` CHECK (`status IN ('UPCOMING', 'LIVE', 'COMPLETED', 'ABANDONED')`).
-- `round_number` INT (1 to 7 for the 28-match round-robin phase).
-
-*Indexes*:
-- `idx_matches_status_date` ON (`status`, `match_date`)
+| `id` | INT | PRIMARY KEY | Settings row identifier |
+| `tournament_name` | VARCHAR(150) | NOT NULL | Official name |
+| `overs_per_match` | INT | DEFAULT 6 | Customizable match overs |
+| `players_per_team` | INT | DEFAULT 8 | Box cricket squad size |
+| `max_wickets` | INT | DEFAULT 7 | Wickets allowed before all out |
+| `allow_last_man_batting` | BOOLEAN | DEFAULT FALSE | Last man can bat alone toggle |
+| `wide_runs` | INT | DEFAULT 1 | Runs awarded for wide |
+| `no_ball_runs` | INT | DEFAULT 1 | Runs awarded for line no-ball |
+| `no_ball_reball` | BOOLEAN | DEFAULT TRUE | Line no-balls re-bowled |
+| `wide_reball` | BOOLEAN | DEFAULT TRUE | Wides re-bowled |
+| `zone_1d_runs` | INT | DEFAULT 1 | Declared runs for Zone 1D |
+| `zone_2d_runs` | INT | DEFAULT 2 | Declared runs for Zone 2D |
+| `zone_4_runs` | INT | DEFAULT 4 | Declared runs for Zone 4 |
+| `direct_out_of_square_enabled` | BOOLEAN | DEFAULT TRUE | Out if hit directly outside square |
+| `allow_lbw` | BOOLEAN | DEFAULT FALSE | Disabled by default |
+| `over_limit_per_bowler` | INT | DEFAULT 2 | Max overs per bowler |
+| `status` | VARCHAR(50) | DEFAULT 'UPCOMING' | `UPCOMING`, `LIVE`, `COMPLETED` |
 
 ---
 
-### 3.4 `ball_events`
-- `innings_id` REFERENCES `match_innings(id)` ON DELETE CASCADE.
-- `ball_sequence` INT NOT NULL: Monotonically increasing counter per innings.
-- `extra_type` CHECK (`extra_type IN ('NONE', 'WIDE', 'NO_BALL', 'BYE', 'LEG_BYE', 'PENALTY', 'ROOF_NET_HIT', 'WALL_HIT')`).
-- `wicket_type` CHECK (`wicket_type IN ('BOWLED', 'CAUGHT', 'LBW', 'RUN_OUT', 'STUMPED', 'HIT_WICKET', 'ONE_TIP_ONE_HAND', 'ROOF_NET_CATCH', 'DIRECT_OUT_OF_BOX')`).
-- `previous_state_snapshot` JSONB NOT NULL: Complete JSON representation of both scorecards and innings state before this delivery was applied.
+### 3.2 `ball_events`
+| Column | Type | Constraints | Description |
+| :--- | :--- | :--- | :--- |
+| `id` | UUID | PRIMARY KEY | Event unique ID |
+| `innings_id` | UUID | FOREIGN KEY, NOT NULL | Reference to `match_innings` |
+| `ball_sequence` | INT | NOT NULL | Sequential delivery counter (1, 2, 3...) |
+| `over_number` | INT | NOT NULL | 0-indexed over number |
+| `ball_in_over` | INT | NOT NULL | 1 to 6 (0 for illegal deliveries) |
+| `bowler_id` | UUID | FOREIGN KEY, NOT NULL | Active bowler |
+| `striker_id` | UUID | FOREIGN KEY, NOT NULL | Active striker |
+| `non_striker_id` | UUID | FOREIGN KEY, NULLABLE | Active non-striker (null for last-man) |
+| `scoring_zone` | VARCHAR(20) | DEFAULT 'NONE' | `NONE`, `ZONE_1D`, `ZONE_2D`, `ZONE_4` |
+| `physical_runs` | INT | DEFAULT 0 | Physical runs completed between wickets |
+| `runs_scored` | INT | DEFAULT 0 | Off-bat total (zone + physical runs) |
+| `extra_type` | VARCHAR(20) | DEFAULT 'NONE' | `NONE`, `WIDE`, `NO_BALL`, `BYE`, `LEG_BYE`, `PENALTY` |
+| `extra_runs` | INT | DEFAULT 0 | Extra runs from penalties |
+| `total_ball_runs` | INT | DEFAULT 0 | Total runs credited on delivery |
+| `is_legal_delivery` | BOOLEAN | DEFAULT TRUE | False for wide or no-ball |
+| `is_wicket` | BOOLEAN | DEFAULT FALSE | Wicket indicator |
+| `wicket_type` | VARCHAR(50) | NULLABLE | `BOWLED`, `CAUGHT`, `LBW`, `RUN_OUT`, `STUMPED`, `HIT_WICKET`, `DIRECT_OUT_OF_SQUARE` |
+| `dismissed_player_id` | UUID | FOREIGN KEY, NULLABLE | Dismissed batsman |
+| `previous_state_snapshot`| JSONB | NOT NULL | Exact serialized JSON state for atomic undo |
 
 *Indexes*:
 - `idx_ball_events_innings_seq` ON (`innings_id`, `ball_sequence` DESC)

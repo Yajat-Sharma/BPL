@@ -2,11 +2,16 @@
 
 ## 1. Executive Architectural Overview
 
-The **Bairajeshwar Premier League (BPL)** tournament platform is designed as a **public-first, real-time, database-driven sports management and broadcast platform**. It caters specifically to **residential box cricket**, where rules (such as net deflections, physical running constraints, bowler quotas, and last-man batting) vary from standard 11-a-side MCC regulations.
+The **Bairajeshwar Premier League (BPL)** tournament platform is designed as a **public-first, real-time, database-driven sports management and broadcast platform**. It caters specifically to the official **BPL box cricket ground configuration**:
+- An open-air **defined playing square** (with **NO overhead net**).
+- **Direct out of square on the full = OUT**.
+- Designated scoring zones: **1D (1 run), 2D (2 runs), 4 (4 runs)**.
+- **Physical running** between the wickets for both striker and non-striker.
+- Strict **line no-balls** (+1 run, re-bowled, not counted as a legal delivery).
 
 The architecture strictly enforces:
 1. **Public-First Access**: Anonymous, zero-friction consumption of live scores, schedules, scorecards, leaderboards, and team rosters without mandatory authentication.
-2. **Deterministic State-Sourced Box Cricket Scoring Engine**: Server-authoritative calculation of deliveries, strike rotations, over terminations, and instantaneous, mathematically consistent **Undo** capability.
+2. **Deterministic State-Sourced Scoring Engine**: Server-authoritative calculation of deliveries, zone runs, physical runs run, line no-balls, strike rotations, and instantaneous **Undo** capability.
 3. **Role-Based Authorization Gate**: Scorer and Super Admin write isolation via cryptographically signed JWT sessions.
 4. **Low-Latency Event-Driven Broadcasting**: WebSocket channel hubs streaming live delivery deltas with heartbeat reconnection and auto-hydration.
 
@@ -19,8 +24,8 @@ flowchart TD
     subgraph Clients ["Public & Authenticated Clients (Next.js 14 / TypeScript)"]
         PublicWeb["Public Spectators (Read-Only: Scorecards, Commentary, Standings)"]
         MemberPortal["Registered Residents (Team info, Profile, Teammates)"]
-        ScorerConsole["Authorized Scorers / Super Admin (Scoring Pad, Wickets, Undo)"]
-        AdminDashboard["Super Admin (Squads, Rules, Fixtures Generator)"]
+        ScorerConsole["Authorized Scorers / Super Admin (Scoring Pad: 1D, 2D, 4, Line NB, Undo)"]
+        AdminDashboard["Super Admin (Squads, Rules, 28-Match Fixtures Generator)"]
     end
 
     subgraph Edge ["Network & Reverse Proxy Layer"]
@@ -33,7 +38,7 @@ flowchart TD
         WSManager["WebSocket Channel Connection Hub (/ws/matches/{id})"]
         
         subgraph CoreEngines ["Core Domain Logic Layer"]
-            BoxScoringEngine["Configurable Box Cricket Scoring Engine"]
+            BPLScoringEngine["BPL Ground Scoring Engine (Zones 1D/2D/4, Line NB, Square Exit)"]
             RoundRobinGenerator["Round-Robin 28-Match Fixture Generator"]
             StatsEngine["Dynamic NRR & Cap Leaderboard Engine"]
             UndoService["State Snapshot & Rollback Engine"]
@@ -57,11 +62,11 @@ flowchart TD
 
     RouterLayer --> AuthService
     RouterLayer --> RoundRobinGenerator
-    RouterLayer --> BoxScoringEngine
+    RouterLayer --> BPLScoringEngine
     RouterLayer --> StatsEngine
     
-    BoxScoringEngine --> UndoService
-    BoxScoringEngine --> WSManager
+    BPLScoringEngine --> UndoService
+    BPLScoringEngine --> WSManager
     UndoService --> WSManager
 
     CoreEngines --> RelationalDB
@@ -72,44 +77,31 @@ flowchart TD
 
 ## 3. Subsystem Architectural Breakdown
 
-### 3.1 Frontend Architecture (Next.js 14 App Router)
+### 3.1 Ground Configuration & Rule Modeling
+- **Playing Area**: Defined marked square.
+- **Overhead Net**: Completely absent. All roof/net hit rules, deflections, and references have been removed from the platform.
+- **Direct Out of Square**: Ball hit directly beyond the square perimeter without touching the turf is recorded as a dismissal (`DIRECT_OUT_OF_SQUARE`).
+- **Scoring Zones**: The ground features designated boundaries:
+  - `1D`: 1 run awarded.
+  - `2D`: 2 runs awarded.
+  - `4`: 4 runs awarded.
+- **Physical Running**: Striker and non-striker can run additional runs. Strike rotates on odd physical runs completed.
+- **Line No-Ball**: Bowler delivering behind/over the marked crease line results in +1 extra run, ball is not counted as legal, and must be re-bowled.
+
+### 3.2 Frontend Architecture (Next.js 14 App Router)
 - **Framework**: Next.js 14 with React 18, TypeScript, and Tailwind CSS.
 - **Visual Identity**: Deep Emerald Green (`#047857`, `#064e3b`), Golden Yellow (`#fbbf24`), Pitch Dark Background (`#06130d`), and Slate typography.
-- **Routing Structure**:
-  - `/`: Public Homepage featuring Live Match prominently, tournament standings, and caps preview.
-  - `/live` & `/live/[id]`: Dedicated live match scoreboard with ball-by-ball updates, full batting/bowling tables, and live commentary.
-  - `/matches`: 28-match round-robin fixture directory with filters for `LIVE`, `UPCOMING`, and `COMPLETED`.
-  - `/teams` & `/teams/[id]`: 8 participating franchises and squad rosters.
-  - `/points-table`: Standings with automated Net Run Rate (NRR) and Top-4 qualification badges.
-  - `/stats`: Orange Cap (runs) and Purple Cap (wickets) rankings.
-  - `/profile`: Member-specific dashboard showing assigned franchise, captain, and teammates.
-  - `/admin`: Super Admin overview metrics.
-  - `/admin/teams`: Franchise squad builder (player assignment by unique BPL User ID).
-  - `/admin/matches`: Single round-robin automated schedule generator.
-  - `/admin/score/[id]`: High-tactility scoring keypad with box-cricket buttons (Direct Wall 4/6, Top Net Hit, One-Tip-One-Hand).
-  - `/admin/settings`: Box cricket configuration panel (overs, wickets allowed, net rules, extras penalty).
 - **Public-First Philosophy**: No route in the public browsing surface prompts or requires an account. Read operations never verify tokens.
 
-### 3.2 Backend Architecture (FastAPI + SQLAlchemy 2.0)
+### 3.3 Backend Architecture (FastAPI + SQLAlchemy 2.0)
 - **Framework**: Python 3.11+ / FastAPI for asynchronous, high-throughput I/O.
-- **Layered Architecture**:
-  - `app/api/v1/`: Endpoint controllers handling payload serialization and HTTP responses.
-  - `app/models/`: SQLAlchemy 2.0 declarative database models with explicit foreign keys and check constraints.
-  - `app/schemas/`: Pydantic V2 schemas for strict data contract validation.
-  - `app/services/`: Pure business logic completely decoupled from web endpoints (Box Cricket Engine, Tournament Scheduler, Undo Manager).
-  - `app/utils/`: Cryptographic hashing, JWT signing/decoding, and email OTP dispatchers.
+- **Scoring Engine**: Implements the BPL ground configuration with state snapshotting (`previous_state_snapshot` in JSONB) on every delivery for 100% bug-free undo.
 - **Concurrency & Transaction Safety**: Every ball event execution runs within an atomic database transaction (`db.commit()`), guaranteeing zero half-written state if a worker process interrupts.
 
-### 3.3 Real-Time Communication Hub
+### 3.4 Real-Time Communication Hub
 - **Protocol**: Raw RFC 6455 WebSockets for sub-millisecond score broadcasting.
 - **Channel Isolation**: Clients subscribe to `/ws/matches/{match_id}`.
-- **Payload Design**: Full hydrated state broadcast on every delivery or undo event:
-  - Total runs, wickets, overs formatted.
-  - Striker & non-striker active statistics (runs, balls faced, boundaries, SR).
-  - Current bowler spell (overs, maidens, runs conceded, wickets, economy).
-  - Recent deliveries array (`4`, `W`, `1wd`, `2net`, `4wall`).
-  - Required Run Rate (RRR) & Current Run Rate (CRR).
-- **Client Auto-Recovery**: The frontend WebSocket hook manages auto-reconnect with exponential backoff and fallback polling if WebSocket connections fail.
+- **Public Live Updates**: Spectators connect without tokens; scorecards update immediately upon any scorer delivery or undo action.
 
 ---
 
@@ -127,5 +119,5 @@ flowchart TD
 | Initialize Match Lineups & Toss | ❌ | ❌ | ❌ | ✅ | ✅ |
 | Create Franchises & Assign Squads | ❌ | ❌ | ❌ | ❌ | ✅ |
 | Generate Round-Robin Schedule | ❌ | ❌ | ❌ | ❌ | ✅ |
-| Configure Box Cricket Rules | ❌ | ❌ | ❌ | ❌ | ✅ |
+| Configure BPL Ground Rules | ❌ | ❌ | ❌ | ❌ | ✅ |
 | Assign Captains & Scorer Roles | ❌ | ❌ | ❌ | ❌ | ✅ |
