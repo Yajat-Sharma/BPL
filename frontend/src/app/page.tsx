@@ -51,28 +51,35 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="flex flex-col items-center text-center">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-bpl-forest/80 border border-bpl-gold/40 text-bpl-gold text-xs font-bold uppercase tracking-wider mb-4 shadow-sm">
-              <Trophy className="w-3.5 h-3.5" /> Official Tournament Portal
+              <Zap className="w-3.5 h-3.5" /> Instant Gully & Box Cricket Scoring
             </div>
             <h1 className="text-4xl sm:text-6xl font-black tracking-tight text-white uppercase max-w-4xl leading-tight">
-              BAIRAJESHWAR <span className="text-transparent bg-clip-text bg-gradient-to-r from-bpl-gold via-yellow-300 to-amber-500">PREMIER LEAGUE</span>
+              GULLY CRICKET <span className="text-transparent bg-clip-text bg-gradient-to-r from-bpl-gold via-yellow-300 to-amber-500">LIVE SCORER</span>
             </h1>
             <p className="mt-4 text-base sm:text-lg text-slate-300 max-w-2xl font-normal leading-relaxed">
-              Experience the excitement of residential cricket with live ball-by-ball score updates, real-time commentary, comprehensive scorecards and interactive leaderboards.
+              Zero hassle cricket scoring for street matches, turf box leagues, and society tournaments. Just add player names, start match, and tap runs live!
             </p>
 
             <div className="mt-8 flex flex-wrap justify-center gap-4">
               <Link
-                href="/live"
-                className="flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-bpl-gold to-yellow-500 text-slate-950 font-bold text-sm hover:from-yellow-400 hover:to-amber-400 transition-all shadow-lg hover:shadow-yellow-500/20 transform hover:-translate-y-0.5"
+                href="/create"
+                className="flex items-center gap-2 px-8 py-3.5 rounded-xl bg-gradient-to-r from-bpl-gold via-yellow-400 to-amber-500 text-slate-950 font-black text-sm uppercase tracking-wider hover:from-yellow-400 hover:to-amber-400 transition-all shadow-xl hover:shadow-yellow-500/20 transform hover:-translate-y-0.5"
               >
-                <Radio className="w-4 h-4 text-slate-950 animate-pulse" />
-                Watch Live Score
+                <Zap className="w-4 h-4 fill-slate-950" />
+                Start Match / League
+              </Link>
+              <Link
+                href="/live"
+                className="flex items-center gap-2 px-6 py-3.5 rounded-xl bg-[#112217] hover:bg-[#1b3827] text-white font-semibold text-sm border border-[#1b3827] hover:border-bpl-emerald/40 transition-colors"
+              >
+                <Radio className="w-4 h-4 text-red-400 animate-pulse" />
+                Watch Live Center
               </Link>
               <Link
                 href="/matches"
-                className="flex items-center gap-2 px-6 py-3 rounded-xl bg-[#112217] hover:bg-[#1b3827] text-white font-semibold text-sm border border-[#1b3827] hover:border-bpl-emerald/40 transition-colors"
+                className="flex items-center gap-2 px-6 py-3.5 rounded-xl bg-[#112217] hover:bg-[#1b3827] text-slate-300 hover:text-white font-semibold text-sm border border-[#1b3827] transition-colors"
               >
-                View All Fixtures
+                Fixtures
                 <ArrowRight className="w-4 h-4" />
               </Link>
             </div>

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Trophy, Radio, Calendar, Users, BarChart3, ShieldCheck, LogIn, LogOut, User as UserIcon } from "lucide-react";
+import { Trophy, Radio, Calendar, Users, BarChart3, ShieldCheck, LogIn, LogOut, User as UserIcon, PlusCircle, Zap } from "lucide-react";
 import { User } from "@/types";
 
 export function Navbar() {
@@ -85,7 +85,15 @@ export function Navbar() {
           </nav>
 
           {/* Right Action / Auth */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5">
+            <Link
+              href="/create"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-black uppercase rounded-lg bg-gradient-to-r from-bpl-gold to-yellow-500 text-slate-950 hover:from-yellow-400 hover:to-amber-400 transition-all shadow-md"
+            >
+              <Zap className="w-3.5 h-3.5 fill-slate-950" />
+              <span>New Match</span>
+            </Link>
+
             {user?.role === "SUPER_ADMIN" && (
               <Link
                 href="/admin"

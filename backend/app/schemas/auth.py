@@ -4,6 +4,14 @@ from pydantic import BaseModel, EmailStr
 class SendOTPRequest(BaseModel):
     email: EmailStr
 
+class GuestLoginRequest(BaseModel):
+    username: Optional[str] = "Gully Player"
+
+class GoogleLoginRequest(BaseModel):
+    email: EmailStr
+    name: str
+    avatar_url: Optional[str] = None
+
 class VerifyOTPRequest(BaseModel):
     email: EmailStr
     otp: str

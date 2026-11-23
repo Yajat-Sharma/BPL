@@ -44,6 +44,17 @@ export default function AdminLiveScoringPage() {
 
   const loadData = async () => {
     try {
+      // Ensure guest session if unauthenticated
+      if (typeof window !== "undefined" && !localStorage.getItem("bpl_token")) {
+        try {
+          const guestRes = await api.post("/auth/guest", { username: "Gully Scorer" });
+          localStorage.setItem("bpl_token", guestRes.data.access_token);
+          localStorage.setItem("bpl_user", JSON.stringify(guestRes.data.user));
+        } catch (e) {
+          console.warn("Guest session setup error:", e);
+        }
+      }
+
       const [mRes, sRes] = await Promise.all([
         api.get(`/matches/${matchId}`),
         api.get(`/scoring/live/${matchId}`).catch(() => ({ data: null })),

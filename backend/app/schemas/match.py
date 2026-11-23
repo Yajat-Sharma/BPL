@@ -82,3 +82,37 @@ class MatchResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+class GullyMatchCreateRequest(BaseModel):
+    match_name: str
+    match_type: Optional[str] = "SINGLE" # "SINGLE" or "LEAGUE"
+    num_matches: Optional[int] = 1 # if league
+    overs_per_innings: Optional[int] = 6
+    venue: Optional[str] = "Gully Turf Ground"
+    ball_type: Optional[str] = "Tennis Ball"
+    
+    # Team names
+    team_a_name: str
+    team_b_name: str
+    
+    # Players (plain name strings)
+    team_a_players: List[str]
+    team_b_players: List[str]
+    
+    # Toss & initial players (optional, if user wants to start right away)
+    toss_winner_team: Optional[str] = "TEAM_A" # "TEAM_A" or "TEAM_B"
+    toss_decision: Optional[str] = "BAT" # "BAT" or "BOWL"
+    striker_name: Optional[str] = None
+    non_striker_name: Optional[str] = None
+    bowler_name: Optional[str] = None
+
+class GullyMatchResponse(BaseModel):
+    match_id: str
+    match_number: str
+    status: str
+    description: str
+    team_a_name: str
+    team_b_name: str
+    overs: int
+    score_url: str
+    live_url: str

@@ -6,7 +6,7 @@ from app.database import get_db
 from app.models.team import Team, TeamPlayer
 from app.models.user import User, UserRole
 from app.schemas.team import TeamCreate, TeamUpdate, TeamResponse, AddPlayerRequest, TeamPlayerResponse
-from app.api.v1.auth import require_super_admin, get_current_user
+from app.api.v1.auth import get_current_user_optional, require_super_admin, get_current_user
 
 router = APIRouter(prefix="/teams", tags=["Teams"])
 
@@ -26,25 +26,14 @@ def get_team_by_id(team_id: str, db: Session = Depends(get_db)):
 def create_team(
     team_in: TeamCreate,
     db: Session = Depends(get_db),
-    admin: User = Depends(require_super_admin)
+    user: Optional[User] = Depends(get_current_user_optional)
 ):
-    # Check max 8 teams limit if enforced
-    total_existing = db.query(Team).count()
-    if total_existing >= 8:
-        raise HTTPException(
-            status_code=400,
-            detail="Tournament allows a maximum of 8 participating teams."
-        )
-
     # Check unique name or short_code
     existing = db.query(Team).filter(
         (Team.name == team_in.name) | (Team.short_code == team_in.short_code)
     ).first()
     if existing:
-        raise HTTPException(
-            status_code=400,
-            detail="Team name or short code already exists"
-        )
+        return existing
 
     team = Team(
         id=str(uuid.uuid4()),
@@ -65,7 +54,7 @@ def update_team(
     team_id: str,
     team_in: TeamUpdate,
     db: Session = Depends(get_db),
-    admin: User = Depends(require_super_admin)
+    user: Optional[User] = Depends(get_current_user_optional)
 ):
     team = db.query(Team).filter(Team.id == team_id).first()
     if not team:
@@ -96,7 +85,7 @@ def update_team(
 def delete_team(
     team_id: str,
     db: Session = Depends(get_db),
-    admin: User = Depends(require_super_admin)
+    user: Optional[User] = Depends(get_current_user_optional)
 ):
     team = db.query(Team).filter(Team.id == team_id).first()
     if not team:
@@ -110,7 +99,7 @@ def add_player_to_team(
     team_id: str,
     req: AddPlayerRequest,
     db: Session = Depends(get_db),
-    admin: User = Depends(require_super_admin)
+    user: Optional[User] = Depends(get_current_user_optional)
 ):
     team = db.query(Team).filter(Team.id == team_id).first()
     if not team:
@@ -155,7 +144,7 @@ def remove_player_from_team(
     team_id: str,
     player_id: str,
     db: Session = Depends(get_db),
-    admin: User = Depends(require_super_admin)
+    user: Optional[User] = Depends(get_current_user_optional)
 ):
     player = db.query(TeamPlayer).filter(
         TeamPlayer.id == player_id,

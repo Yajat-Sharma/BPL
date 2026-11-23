@@ -1,3 +1,4 @@
+import uuid
 from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
@@ -5,37 +6,47 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.user import User, UserRole
 from app.models.team import Team, TeamPlayer
-from app.schemas.auth import SendOTPRequest, VerifyOTPRequest, TokenResponse, UserResponse, MemberProfileResponse
+from app.schemas.auth import (
+    SendOTPRequest, 
+    VerifyOTPRequest, 
+    GuestLoginRequest,
+    GoogleLoginRequest,
+    TokenResponse, 
+    UserResponse, 
+    MemberProfileResponse
+)
 from app.services.auth_service import create_and_send_otp, verify_otp_and_login_or_register
 from app.utils.security import create_access_token, decode_access_token
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 security = HTTPBearer(auto_error=False)
 
+def get_current_user_optional(
+    credentials: Optional[HTTPAuthorizationCredentials] = Depends(security),
+    db: Session = Depends(get_db)
+) -> Optional[User]:
+    if not credentials:
+        return None
+    try:
+        token = credentials.credentials
+        payload = decode_access_token(token)
+        if not payload:
+            return None
+        user_id = payload.get("sub")
+        return db.query(User).filter(User.id == user_id).first()
+    except Exception:
+        return None
+
 def get_current_user(
     credentials: Optional[HTTPAuthorizationCredentials] = Depends(security),
     db: Session = Depends(get_db)
 ) -> User:
-    if not credentials:
+    user = get_current_user_optional(credentials, db)
+    if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Authentication credentials not provided",
             headers={"WWW-Authenticate": "Bearer"},
-        )
-    token = credentials.credentials
-    payload = decode_access_token(token)
-    if not payload:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Could not validate credentials or token expired",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    user_id = payload.get("sub")
-    user = db.query(User).filter(User.id == user_id).first()
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found"
         )
     return user
 
@@ -78,6 +89,67 @@ def verify_otp(req: VerifyOTPRequest, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail="Authentication server error")
+
+@router.post("/guest", response_model=TokenResponse)
+def login_as_guest(req: GuestLoginRequest, db: Session = Depends(get_db)):
+    """
+    Instant 1-Click Guest access for casual/gully cricket scoring.
+    """
+    short_id = uuid.uuid4().hex[:6].upper()
+    guest_username = req.username or f"Guest-{short_id}"
+    guest_email = f"guest_{uuid.uuid4().hex[:8]}@gully.local"
+    
+    user = User(
+        id=str(uuid.uuid4()),
+        user_id=f"GST_{short_id}",
+        username=guest_username,
+        email=guest_email,
+        role=UserRole.USER.value,
+        is_active=True
+    )
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+
+    token = create_access_token({"sub": user.id, "role": user.role, "user_id": user.user_id})
+    return {
+        "access_token": token,
+        "token_type": "bearer",
+        "user": user
+    }
+
+@router.post("/google-login", response_model=TokenResponse)
+def login_with_google(req: GoogleLoginRequest, db: Session = Depends(get_db)):
+    """
+    Fast Google Login / OAuth handler for gully cricket scorers and spectators.
+    """
+    clean_email = req.email.lower().strip()
+    user = db.query(User).filter(User.email == clean_email).first()
+    
+    if not user:
+        short_id = uuid.uuid4().hex[:6].upper()
+        user = User(
+            id=str(uuid.uuid4()),
+            user_id=f"GGL_{short_id}",
+            username=req.name or f"Player-{short_id}",
+            email=clean_email,
+            role=UserRole.USER.value,
+            is_active=True
+        )
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+    else:
+        if req.name and not user.username:
+            user.username = req.name
+            db.commit()
+
+    token = create_access_token({"sub": user.id, "role": user.role, "user_id": user.user_id})
+    return {
+        "access_token": token,
+        "token_type": "bearer",
+        "user": user
+    }
 
 @router.get("/me", response_model=MemberProfileResponse)
 def get_current_member_profile(

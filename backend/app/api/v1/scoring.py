@@ -1,5 +1,5 @@
 import asyncio
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from app.database import get_db
@@ -14,7 +14,7 @@ from app.services.scoring_engine import (
     build_match_live_payload
 )
 from app.services.websocket_manager import ws_manager
-from app.api.v1.auth import require_super_admin
+from app.api.v1.auth import get_current_user_optional
 
 router = APIRouter(prefix="/scoring", tags=["Live Scoring"])
 
@@ -132,7 +132,7 @@ async def record_ball(
     match_id: str,
     delivery: BallDeliveryInput,
     db: Session = Depends(get_db),
-    admin: User = Depends(require_super_admin)
+    user: Optional[User] = Depends(get_current_user_optional)
 ):
     try:
         updated_state = process_ball_delivery(db, match_id, delivery)
@@ -146,7 +146,7 @@ async def record_ball(
 async def undo_delivery(
     match_id: str,
     db: Session = Depends(get_db),
-    admin: User = Depends(require_super_admin)
+    user: Optional[User] = Depends(get_current_user_optional)
 ):
     try:
         updated_state = undo_last_ball(db, match_id)
@@ -161,7 +161,7 @@ async def switch_bowler(
     match_id: str,
     inp: SwitchBowlerInput,
     db: Session = Depends(get_db),
-    admin: User = Depends(require_super_admin)
+    user: Optional[User] = Depends(get_current_user_optional)
 ):
     match = db.query(Match).filter(Match.id == match_id).first()
     if not match:
@@ -199,7 +199,7 @@ async def select_batsman(
     match_id: str,
     inp: SelectNewBatsmanInput,
     db: Session = Depends(get_db),
-    admin: User = Depends(require_super_admin)
+    user: Optional[User] = Depends(get_current_user_optional)
 ):
     match = db.query(Match).filter(Match.id == match_id).first()
     if not match:
@@ -243,7 +243,7 @@ async def select_batsman(
 async def manual_swap_strike(
     match_id: str,
     db: Session = Depends(get_db),
-    admin: User = Depends(require_super_admin)
+    user: Optional[User] = Depends(get_current_user_optional)
 ):
     match = db.query(Match).filter(Match.id == match_id).first()
     if not match:
