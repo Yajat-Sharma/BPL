@@ -319,9 +319,23 @@ export default function CreateGullyMatchPage() {
           </div>
 
           <div>
-            <label className="block text-xs font-bold uppercase text-slate-400 mb-2">
-              Overs Per Innings: <span className="text-bpl-gold font-black">{overs} Overs</span>
-            </label>
+            <div className="flex items-center justify-between mb-2">
+              <label className="text-xs font-bold uppercase text-slate-400">
+                Overs Per Innings: <span className="text-bpl-gold font-black">{overs} Overs</span>
+              </label>
+              <div className="flex items-center gap-2">
+                <span className="text-[11px] text-slate-400 font-semibold">Custom Overs:</span>
+                <input
+                  type="number"
+                  min={1}
+                  max={100}
+                  value={overs}
+                  onChange={(e) => setOvers(Math.max(1, parseInt(e.target.value) || 1))}
+                  className="w-20 bg-[#06130d] border border-bpl-gold/60 focus:border-bpl-gold rounded-lg px-2.5 py-1 text-xs text-white text-center font-bold font-mono focus:outline-none focus:ring-1 focus:ring-bpl-gold"
+                />
+                <span className="text-[11px] text-slate-400 font-bold">ov</span>
+              </div>
+            </div>
             <div className="flex flex-wrap gap-2">
               {PRESET_OVERS.map((ov) => (
                 <button

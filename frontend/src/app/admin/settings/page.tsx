@@ -289,7 +289,7 @@ export default function AdminSettingsPage() {
                 <input
                   type="number"
                   min={1}
-                  max={20}
+                  max={100}
                   value={overs}
                   onChange={(e) => setOvers(parseInt(e.target.value) || 6)}
                   className="w-full bg-[#06130d] border border-[#1b3827] focus:border-bpl-gold rounded-xl px-4 py-3 text-sm text-white focus:outline-none font-mono"
