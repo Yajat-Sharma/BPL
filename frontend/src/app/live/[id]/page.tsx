@@ -230,6 +230,59 @@ export default function LiveMatchDetailPage() {
           </div>
         </div>
 
+        {/* Current Batters & Bowler Strip */}
+        {(state.striker || state.non_striker || state.bowler) && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+            {/* Batters */}
+            <div className="bg-stone-50 rounded-2xl p-3 border border-stone-100 space-y-1.5">
+              <div className="text-[10px] font-black uppercase tracking-wider text-stone-400">
+                Batting
+              </div>
+              {state.striker && (
+                <div className="flex items-center justify-between text-xs">
+                  <span className="font-bold text-stone-900 truncate">
+                    <span className="text-red-600 mr-1">★</span>
+                    {state.striker.name}
+                  </span>
+                  <span className="font-mono font-black text-stone-900 ml-2 flex-shrink-0">
+                    {state.striker.runs}*{" "}
+                    <span className="text-stone-400 font-medium">({state.striker.balls})</span>
+                  </span>
+                </div>
+              )}
+              {state.non_striker && (
+                <div className="flex items-center justify-between text-xs">
+                  <span className="font-semibold text-stone-600 truncate">
+                    {state.non_striker.name}
+                  </span>
+                  <span className="font-mono font-bold text-stone-700 ml-2 flex-shrink-0">
+                    {state.non_striker.runs}{" "}
+                    <span className="text-stone-400 font-medium">({state.non_striker.balls})</span>
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* Current Bowler */}
+            {state.bowler && (
+              <div className="bg-stone-50 rounded-2xl p-3 border border-stone-100 flex flex-col justify-between">
+                <div className="text-[10px] font-black uppercase tracking-wider text-stone-400">
+                  Bowling
+                </div>
+                <div className="flex items-center justify-between text-xs mt-1">
+                  <span className="font-bold text-stone-900 truncate">
+                    {state.bowler.name}
+                  </span>
+                  <span className="font-mono font-black text-red-600 ml-2 flex-shrink-0">
+                    {state.bowler.wickets}/{state.bowler.runs}{" "}
+                    <span className="text-stone-400 font-medium">({state.bowler.overs})</span>
+                  </span>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Tap to Expand Cue */}
         <div className="pt-2 border-t border-stone-100 flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-wider text-red-600 group-hover:text-red-700">
           <Maximize2 className="w-3.5 h-3.5" />
