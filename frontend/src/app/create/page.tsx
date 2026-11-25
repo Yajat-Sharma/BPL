@@ -136,7 +136,6 @@ export default function CreateGullyMatchPage() {
     setLoading(true);
 
     try {
-      // 1. Ensure user has a guest token if not logged in
       let token = typeof window !== "undefined" ? localStorage.getItem("bpl_token") : null;
       if (!token) {
         try {
@@ -149,7 +148,6 @@ export default function CreateGullyMatchPage() {
         }
       }
 
-      // 2. Quick create match payload
       const payload = {
         match_name: matchName.trim() || `${teamAName} vs ${teamBName}`,
         match_type: matchType,
@@ -171,7 +169,6 @@ export default function CreateGullyMatchPage() {
       const res = await api.post("/matches/quick-create", payload);
       const matchId = res.data.match_id;
 
-      // 3. Immediately launch scoring pad
       router.push(`/admin/score/${matchId}`);
     } catch (err: any) {
       console.error(err);
@@ -184,58 +181,58 @@ export default function CreateGullyMatchPage() {
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-8">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#1b3827] pb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-stone-200 pb-6">
         <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-950/80 border border-bpl-gold/40 text-bpl-gold text-xs font-bold uppercase tracking-wider mb-2">
-            <Zap className="w-3.5 h-3.5" /> Gully & Box Cricket Hub
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-50 border border-red-200 text-red-600 text-xs font-bold uppercase tracking-wider mb-2">
+            <Zap className="w-3.5 h-3.5" /> CRICLIVE Match & League Setup
           </div>
-          <h1 className="text-3xl sm:text-4xl font-black uppercase text-white tracking-tight">
-            Create Match or League
+          <h1 className="text-3xl sm:text-4xl font-black uppercase text-stone-900 tracking-tight">
+            Create Match or Tournament
           </h1>
-          <p className="text-sm text-slate-400 mt-1">
-            Zero setup required. Add your team, tap in your player names, and start scoring in seconds!
+          <p className="text-sm text-stone-500 mt-1">
+            Zero setup required. Add your team names, enter your players, and start scoring in seconds!
           </p>
         </div>
 
         <button
           type="button"
           onClick={handleQuickFill}
-          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-bpl-forest hover:bg-[#1b3827] border border-bpl-gold/40 text-bpl-gold text-xs font-bold uppercase transition-all shadow-md self-start sm:self-auto"
+          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-white hover:bg-stone-50 border border-stone-300 text-stone-700 hover:text-red-600 text-xs font-bold uppercase transition-all shadow-sm self-start sm:self-auto"
         >
-          <Dice5 className="w-4 h-4" /> Quick Auto-Fill (6v6)
+          <Dice5 className="w-4 h-4 text-red-600" /> Quick Auto-Fill (6v6)
         </button>
       </div>
 
       {error && (
-        <div className="p-4 rounded-xl bg-red-950/70 border border-red-800 text-red-200 text-sm font-semibold">
+        <div className="p-4 rounded-2xl bg-red-50 border border-red-200 text-red-700 text-sm font-semibold">
           {error}
         </div>
       )}
 
       <form onSubmit={handleCreateMatch} className="space-y-8">
         {/* Step 1: Match Type & Format */}
-        <div className="emerald-card rounded-2xl p-6 sm:p-8 border border-bpl-emerald/40 space-y-6">
-          <div className="flex items-center gap-2 text-xs font-bold uppercase text-bpl-gold tracking-wider">
-            <Layers className="w-4 h-4" /> Step 1: Match Format & Rules
+        <div className="bg-white rounded-3xl p-6 sm:p-8 border border-stone-200 shadow-sm space-y-6">
+          <div className="flex items-center gap-2 text-xs font-black uppercase text-red-600 tracking-wider">
+            <Layers className="w-4 h-4" /> Step 1: Format & Regulations
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <button
               type="button"
               onClick={() => setMatchType("SINGLE")}
-              className={`p-4 rounded-xl border text-left transition-all ${
+              className={`p-5 rounded-2xl border text-left transition-all ${
                 matchType === "SINGLE"
-                  ? "bg-bpl-emerald/30 border-bpl-gold text-white shadow-lg ring-1 ring-bpl-gold"
-                  : "bg-[#06130d] border-[#1b3827] text-slate-400 hover:border-slate-600"
+                  ? "bg-red-50/60 border-red-600 text-stone-900 shadow-sm ring-1 ring-red-600"
+                  : "bg-white border-stone-200 text-stone-500 hover:border-stone-300"
               }`}
             >
               <div className="flex items-center justify-between">
-                <span className="text-sm font-bold text-white flex items-center gap-2">
-                  <Zap className="w-4 h-4 text-bpl-gold" /> Single Quick Match
+                <span className="text-sm font-black text-stone-900 flex items-center gap-2 uppercase tracking-wide">
+                  <Zap className="w-4 h-4 text-red-600" /> Single Quick Match
                 </span>
-                {matchType === "SINGLE" && <CheckCircle2 className="w-4 h-4 text-bpl-gold" />}
+                {matchType === "SINGLE" && <CheckCircle2 className="w-4 h-4 text-red-600" />}
               </div>
-              <p className="text-xs text-slate-400 mt-2">
+              <p className="text-xs text-stone-500 mt-2 leading-relaxed">
                 1v1 Head-to-Head Clash. Perfect for casual weekend gully or turf matches.
               </p>
             </button>
@@ -243,29 +240,31 @@ export default function CreateGullyMatchPage() {
             <button
               type="button"
               onClick={() => setMatchType("LEAGUE")}
-              className={`p-4 rounded-xl border text-left transition-all ${
+              className={`p-5 rounded-2xl border text-left transition-all ${
                 matchType === "LEAGUE"
-                  ? "bg-bpl-emerald/30 border-bpl-gold text-white shadow-lg ring-1 ring-bpl-gold"
-                  : "bg-[#06130d] border-[#1b3827] text-slate-400 hover:border-slate-600"
+                  ? "bg-red-50/60 border-red-600 text-stone-900 shadow-sm ring-1 ring-red-600"
+                  : "bg-white border-stone-200 text-stone-500 hover:border-stone-300"
               }`}
             >
               <div className="flex items-center justify-between">
-                <span className="text-sm font-bold text-white flex items-center gap-2">
-                  <Trophy className="w-4 h-4 text-bpl-gold" /> Mini League / Series
+                <span className="text-sm font-black text-stone-900 flex items-center gap-2 uppercase tracking-wide">
+                  <Trophy className="w-4 h-4 text-red-600" /> Mini League / Series
                 </span>
-                {matchType === "LEAGUE" && <CheckCircle2 className="w-4 h-4 text-bpl-gold" />}
+                {matchType === "LEAGUE" && <CheckCircle2 className="w-4 h-4 text-red-600" />}
               </div>
-              <p className="text-xs text-slate-400 mt-2">
+              <p className="text-xs text-stone-500 mt-2 leading-relaxed">
                 Multi-match series or tournament. Auto-schedules consecutive fixtures.
               </p>
             </button>
           </div>
 
           {matchType === "LEAGUE" && (
-            <div className="bg-[#06130d] p-4 rounded-xl border border-bpl-gold/30 flex items-center justify-between">
+            <div className="bg-stone-50 p-4 rounded-2xl border border-stone-200 flex flex-wrap items-center justify-between gap-3">
               <div>
-                <label className="text-xs font-bold text-white uppercase">Number of Matches in Series</label>
-                <p className="text-[11px] text-slate-400">Total fixtures to generate for this league</p>
+                <label className="text-xs font-bold text-stone-800 uppercase">
+                  Number of Matches in Series
+                </label>
+                <p className="text-[11px] text-stone-400">Total fixtures to generate for this league</p>
               </div>
               <div className="flex items-center gap-2">
                 {[2, 3, 5, 7].map((num) => (
@@ -273,10 +272,10 @@ export default function CreateGullyMatchPage() {
                     key={num}
                     type="button"
                     onClick={() => setNumMatches(num)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
                       numMatches === num
-                        ? "bg-bpl-gold text-slate-950 shadow"
-                        : "bg-[#112217] text-slate-300 hover:bg-[#1b3827]"
+                        ? "bg-red-600 text-white shadow-sm"
+                        : "bg-white text-stone-700 border border-stone-200 hover:bg-stone-100"
                     }`}
                   >
                     {num} Matches
@@ -288,7 +287,7 @@ export default function CreateGullyMatchPage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div>
-              <label className="block text-xs font-bold uppercase text-slate-400 mb-1.5">
+              <label className="block text-xs font-bold uppercase text-stone-600 mb-1.5">
                 Match / Tournament Title
               </label>
               <input
@@ -297,18 +296,18 @@ export default function CreateGullyMatchPage() {
                 value={matchName}
                 onChange={(e) => setMatchName(e.target.value)}
                 placeholder="e.g. Sunday Gully Derby"
-                className="w-full bg-[#06130d] border border-[#1b3827] focus:border-bpl-gold rounded-xl px-4 py-3 text-sm text-white focus:outline-none"
+                className="w-full bg-stone-50 border border-stone-200 focus:border-red-600 rounded-xl px-4 py-3 text-sm text-stone-900 font-semibold focus:outline-none"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-bold uppercase text-slate-400 mb-1.5">
+              <label className="block text-xs font-bold uppercase text-stone-600 mb-1.5">
                 Ball Type
               </label>
               <select
                 value={ballType}
                 onChange={(e) => setBallType(e.target.value)}
-                className="w-full bg-[#06130d] border border-[#1b3827] focus:border-bpl-gold rounded-xl px-4 py-3 text-sm text-white focus:outline-none"
+                className="w-full bg-stone-50 border border-stone-200 focus:border-red-600 rounded-xl px-4 py-3 text-sm text-stone-900 font-semibold focus:outline-none"
               >
                 <option value="Tennis Ball">🎾 Tennis Ball (Light/Heavy)</option>
                 <option value="Tape Ball">🏏 Tape Ball</option>
@@ -320,20 +319,20 @@ export default function CreateGullyMatchPage() {
 
           <div>
             <div className="flex items-center justify-between mb-2">
-              <label className="text-xs font-bold uppercase text-slate-400">
-                Overs Per Innings: <span className="text-bpl-gold font-black">{overs} Overs</span>
+              <label className="text-xs font-bold uppercase text-stone-600">
+                Overs Per Innings: <span className="text-red-600 font-black">{overs} Overs</span>
               </label>
               <div className="flex items-center gap-2">
-                <span className="text-[11px] text-slate-400 font-semibold">Custom Overs:</span>
+                <span className="text-[11px] text-stone-400 font-semibold">Custom Overs:</span>
                 <input
                   type="number"
                   min={1}
                   max={100}
                   value={overs}
                   onChange={(e) => setOvers(Math.max(1, parseInt(e.target.value) || 1))}
-                  className="w-20 bg-[#06130d] border border-bpl-gold/60 focus:border-bpl-gold rounded-lg px-2.5 py-1 text-xs text-white text-center font-bold font-mono focus:outline-none focus:ring-1 focus:ring-bpl-gold"
+                  className="w-20 bg-stone-50 border border-stone-300 focus:border-red-600 rounded-xl px-2.5 py-1 text-xs text-stone-900 text-center font-bold font-mono focus:outline-none"
                 />
-                <span className="text-[11px] text-slate-400 font-bold">ov</span>
+                <span className="text-[11px] text-stone-500 font-bold">ov</span>
               </div>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -344,8 +343,8 @@ export default function CreateGullyMatchPage() {
                   onClick={() => setOvers(ov)}
                   className={`px-4 py-2 rounded-xl text-xs font-bold uppercase transition-all ${
                     overs === ov
-                      ? "bg-bpl-gold text-slate-950 font-black shadow-md scale-105"
-                      : "bg-[#06130d] border border-[#1b3827] text-slate-300 hover:border-bpl-gold/50"
+                      ? "bg-red-600 text-white font-black shadow-sm scale-105"
+                      : "bg-stone-50 border border-stone-200 text-stone-700 hover:border-red-300"
                   }`}
                 >
                   {ov} Ov
@@ -356,16 +355,16 @@ export default function CreateGullyMatchPage() {
         </div>
 
         {/* Step 2: Teams & Players */}
-        <div className="emerald-card rounded-2xl p-6 sm:p-8 border border-bpl-emerald/40 space-y-6">
-          <div className="flex items-center gap-2 text-xs font-bold uppercase text-bpl-gold tracking-wider">
-            <Users className="w-4 h-4" /> Step 2: Teams & Player Squads
+        <div className="bg-white rounded-3xl p-6 sm:p-8 border border-stone-200 shadow-sm space-y-6">
+          <div className="flex items-center gap-2 text-xs font-black uppercase text-red-600 tracking-wider">
+            <Users className="w-4 h-4" /> Step 2: Teams & Squad Lineup
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* Team A */}
-            <div className="space-y-4 p-4 rounded-xl bg-[#06130d] border border-[#1b3827]">
+            <div className="space-y-4 p-5 rounded-2xl bg-stone-50 border border-stone-200">
               <div>
-                <label className="block text-xs font-bold uppercase text-bpl-mint mb-1">
+                <label className="block text-xs font-bold uppercase text-red-600 mb-1">
                   Team A Name
                 </label>
                 <input
@@ -374,12 +373,12 @@ export default function CreateGullyMatchPage() {
                   value={teamAName}
                   onChange={(e) => setTeamAName(e.target.value)}
                   placeholder="e.g. Royal Strikers"
-                  className="w-full bg-[#0a2719] border border-[#1b3827] focus:border-bpl-mint rounded-xl px-3 py-2 text-sm text-white font-bold focus:outline-none"
+                  className="w-full bg-white border border-stone-200 focus:border-red-600 rounded-xl px-3 py-2 text-sm text-stone-900 font-bold focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase text-slate-400 mb-1">
+                <label className="block text-xs font-bold uppercase text-stone-500 mb-1">
                   Add Players ({teamAPlayers.length} added)
                 </label>
                 <div className="flex gap-2">
@@ -389,12 +388,12 @@ export default function CreateGullyMatchPage() {
                     onChange={(e) => setNewPlayerA(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && handleAddPlayerA(e)}
                     placeholder="Type name & hit Enter"
-                    className="flex-1 bg-[#112217] border border-[#1b3827] focus:border-bpl-gold rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none"
+                    className="flex-1 bg-white border border-stone-200 focus:border-red-600 rounded-xl px-3 py-1.5 text-xs text-stone-900 focus:outline-none"
                   />
                   <button
                     type="button"
                     onClick={() => handleAddPlayerA()}
-                    className="px-3 py-1.5 rounded-lg bg-bpl-mint/20 border border-bpl-mint/40 text-bpl-mint hover:bg-bpl-mint/30 text-xs font-bold"
+                    className="px-3 py-1.5 rounded-xl bg-red-50 border border-red-200 text-red-600 hover:bg-red-100 text-xs font-bold"
                   >
                     <Plus className="w-3.5 h-3.5" />
                   </button>
@@ -404,13 +403,13 @@ export default function CreateGullyMatchPage() {
                   {teamAPlayers.map((p) => (
                     <span
                       key={p}
-                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-950/80 border border-emerald-700/50 text-emerald-200 text-xs font-semibold"
+                      className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-50 border border-red-200 text-red-700 text-xs font-bold"
                     >
                       {p}
                       <button
                         type="button"
                         onClick={() => handleRemovePlayerA(p)}
-                        className="hover:text-red-400 transition-colors"
+                        className="hover:text-red-900 transition-colors"
                       >
                         <X className="w-3 h-3" />
                       </button>
@@ -421,9 +420,9 @@ export default function CreateGullyMatchPage() {
             </div>
 
             {/* Team B */}
-            <div className="space-y-4 p-4 rounded-xl bg-[#06130d] border border-[#1b3827]">
+            <div className="space-y-4 p-5 rounded-2xl bg-stone-50 border border-stone-200">
               <div>
-                <label className="block text-xs font-bold uppercase text-blue-400 mb-1">
+                <label className="block text-xs font-bold uppercase text-stone-700 mb-1">
                   Team B Name
                 </label>
                 <input
@@ -432,12 +431,12 @@ export default function CreateGullyMatchPage() {
                   value={teamBName}
                   onChange={(e) => setTeamBName(e.target.value)}
                   placeholder="e.g. Gully Kings"
-                  className="w-full bg-[#0a1f33] border border-[#1b3827] focus:border-blue-400 rounded-xl px-3 py-2 text-sm text-white font-bold focus:outline-none"
+                  className="w-full bg-white border border-stone-200 focus:border-stone-700 rounded-xl px-3 py-2 text-sm text-stone-900 font-bold focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase text-slate-400 mb-1">
+                <label className="block text-xs font-bold uppercase text-stone-500 mb-1">
                   Add Players ({teamBPlayers.length} added)
                 </label>
                 <div className="flex gap-2">
@@ -447,12 +446,12 @@ export default function CreateGullyMatchPage() {
                     onChange={(e) => setNewPlayerB(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && handleAddPlayerB(e)}
                     placeholder="Type name & hit Enter"
-                    className="flex-1 bg-[#112217] border border-[#1b3827] focus:border-bpl-gold rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none"
+                    className="flex-1 bg-white border border-stone-200 focus:border-stone-700 rounded-xl px-3 py-1.5 text-xs text-stone-900 focus:outline-none"
                   />
                   <button
                     type="button"
                     onClick={() => handleAddPlayerB()}
-                    className="px-3 py-1.5 rounded-lg bg-blue-500/20 border border-blue-500/40 text-blue-300 hover:bg-blue-500/30 text-xs font-bold"
+                    className="px-3 py-1.5 rounded-xl bg-stone-100 border border-stone-300 text-stone-700 hover:bg-stone-200 text-xs font-bold"
                   >
                     <Plus className="w-3.5 h-3.5" />
                   </button>
@@ -462,13 +461,13 @@ export default function CreateGullyMatchPage() {
                   {teamBPlayers.map((p) => (
                     <span
                       key={p}
-                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-blue-950/80 border border-blue-700/50 text-blue-200 text-xs font-semibold"
+                      className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-stone-100 border border-stone-300 text-stone-800 text-xs font-bold"
                     >
                       {p}
                       <button
                         type="button"
                         onClick={() => handleRemovePlayerB(p)}
-                        className="hover:text-red-400 transition-colors"
+                        className="hover:text-red-600 transition-colors"
                       >
                         <X className="w-3 h-3" />
                       </button>
@@ -481,20 +480,20 @@ export default function CreateGullyMatchPage() {
         </div>
 
         {/* Step 3: Toss & Starters */}
-        <div className="emerald-card rounded-2xl p-6 sm:p-8 border border-bpl-emerald/40 space-y-6">
-          <div className="flex items-center gap-2 text-xs font-bold uppercase text-bpl-gold tracking-wider">
+        <div className="bg-white rounded-3xl p-6 sm:p-8 border border-stone-200 shadow-sm space-y-6">
+          <div className="flex items-center gap-2 text-xs font-black uppercase text-red-600 tracking-wider">
             <Flame className="w-4 h-4" /> Step 3: Toss & Opening Starters
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div>
-              <label className="block text-xs font-bold uppercase text-slate-400 mb-1.5">
+              <label className="block text-xs font-bold uppercase text-stone-600 mb-1.5">
                 Toss Won By
               </label>
               <select
                 value={tossWinner}
                 onChange={(e) => setTossWinner(e.target.value as any)}
-                className="w-full bg-[#06130d] border border-[#1b3827] focus:border-bpl-gold rounded-xl px-4 py-3 text-sm text-white focus:outline-none"
+                className="w-full bg-stone-50 border border-stone-200 focus:border-red-600 rounded-xl px-4 py-3 text-sm text-stone-900 font-semibold focus:outline-none"
               >
                 <option value="TEAM_A">{teamAName || "Team A"}</option>
                 <option value="TEAM_B">{teamBName || "Team B"}</option>
@@ -502,13 +501,13 @@ export default function CreateGullyMatchPage() {
             </div>
 
             <div>
-              <label className="block text-xs font-bold uppercase text-slate-400 mb-1.5">
+              <label className="block text-xs font-bold uppercase text-stone-600 mb-1.5">
                 Elected To
               </label>
               <select
                 value={tossDecision}
                 onChange={(e) => setTossDecision(e.target.value as any)}
-                className="w-full bg-[#06130d] border border-[#1b3827] focus:border-bpl-gold rounded-xl px-4 py-3 text-sm text-white focus:outline-none"
+                className="w-full bg-stone-50 border border-stone-200 focus:border-red-600 rounded-xl px-4 py-3 text-sm text-stone-900 font-semibold focus:outline-none"
               >
                 <option value="BAT">🏏 Bat First</option>
                 <option value="BOWL">⚾ Bowl First</option>
@@ -516,21 +515,22 @@ export default function CreateGullyMatchPage() {
             </div>
           </div>
 
-          <div className="p-4 rounded-xl bg-[#06130d] border border-bpl-gold/30">
-            <div className="text-xs text-bpl-gold font-bold uppercase mb-3">
-              1st Innings: <span className="text-white">{battingTeamName}</span> Batting vs{" "}
-              <span className="text-white">{bowlingTeamName}</span> Bowling
+          <div className="p-5 rounded-2xl bg-stone-50 border border-stone-200">
+            <div className="text-xs text-red-600 font-black uppercase tracking-wider mb-3">
+              1st Innings: <span className="text-stone-900 font-bold">{battingTeamName}</span>{" "}
+              Batting vs <span className="text-stone-900 font-bold">{bowlingTeamName}</span>{" "}
+              Bowling
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
-                <label className="block text-xs font-bold uppercase text-bpl-mint mb-1">
+                <label className="block text-xs font-bold uppercase text-red-600 mb-1">
                   Striker (*)
                 </label>
                 <select
                   value={strikerName}
                   onChange={(e) => setStrikerName(e.target.value)}
-                  className="w-full bg-[#112217] border border-[#1b3827] focus:border-bpl-mint rounded-lg px-3 py-2 text-xs text-white focus:outline-none"
+                  className="w-full bg-white border border-stone-200 focus:border-red-600 rounded-xl px-3 py-2 text-xs text-stone-900 font-medium focus:outline-none"
                 >
                   <option value="">{battingPlayers[0] || "Select Striker"}</option>
                   {battingPlayers.map((p) => (
@@ -542,13 +542,13 @@ export default function CreateGullyMatchPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase text-slate-300 mb-1">
+                <label className="block text-xs font-bold uppercase text-stone-600 mb-1">
                   Non-Striker
                 </label>
                 <select
                   value={nonStrikerName}
                   onChange={(e) => setNonStrikerName(e.target.value)}
-                  className="w-full bg-[#112217] border border-[#1b3827] focus:border-bpl-mint rounded-lg px-3 py-2 text-xs text-white focus:outline-none"
+                  className="w-full bg-white border border-stone-200 focus:border-red-600 rounded-xl px-3 py-2 text-xs text-stone-900 font-medium focus:outline-none"
                 >
                   <option value="">{battingPlayers[1] || "Select Non-Striker"}</option>
                   {battingPlayers.map((p) => (
@@ -560,13 +560,13 @@ export default function CreateGullyMatchPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase text-blue-400 mb-1">
+                <label className="block text-xs font-bold uppercase text-stone-600 mb-1">
                   Opening Bowler
                 </label>
                 <select
                   value={bowlerName}
                   onChange={(e) => setBowlerName(e.target.value)}
-                  className="w-full bg-[#112217] border border-[#1b3827] focus:border-blue-400 rounded-lg px-3 py-2 text-xs text-white focus:outline-none"
+                  className="w-full bg-white border border-stone-200 focus:border-red-600 rounded-xl px-3 py-2 text-xs text-stone-900 font-medium focus:outline-none"
                 >
                   <option value="">{bowlingPlayers[0] || "Select Bowler"}</option>
                   {bowlingPlayers.map((p) => (
@@ -581,17 +581,17 @@ export default function CreateGullyMatchPage() {
         </div>
 
         {/* Submit Button */}
-        <div className="flex justify-end pt-4">
+        <div className="flex justify-end pt-2">
           <button
             type="submit"
             disabled={loading}
-            className="w-full sm:w-auto px-10 py-4 rounded-xl bg-gradient-to-r from-bpl-gold via-yellow-400 to-amber-500 text-slate-950 font-black text-base uppercase tracking-wider hover:from-yellow-400 hover:to-amber-400 transition-all shadow-xl hover:shadow-yellow-500/20 transform hover:-translate-y-0.5 flex items-center justify-center gap-3 disabled:opacity-50"
+            className="w-full sm:w-auto px-10 py-4 rounded-2xl bg-red-600 hover:bg-red-700 text-white font-black text-base uppercase tracking-wider transition-all shadow-md hover:shadow-red-500/20 transform hover:-translate-y-0.5 flex items-center justify-center gap-3 disabled:opacity-50"
           >
             {loading ? (
               <>Creating Match & Initializing...</>
             ) : (
               <>
-                <Play className="w-5 h-5 fill-slate-950" /> Start Match & Score Now
+                <Play className="w-5 h-5 fill-white text-white" /> Start Match & Score Now
               </>
             )}
           </button>

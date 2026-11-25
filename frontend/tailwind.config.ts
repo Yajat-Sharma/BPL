@@ -9,17 +9,28 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        cric: {
+          red: "#EA2B2B",
+          darkRed: "#C62828",
+          lightRed: "#FEE2E2",
+          bg: "#F5F4EF",
+          card: "#FFFFFF",
+          surface: "#FDFDFD",
+          border: "#E7E5DC",
+          dark: "#111827",
+          muted: "#6B7280"
+        },
         bpl: {
-          dark: "#06130d",
-          forest: "#064e3b",
-          emerald: "#047857",
-          mint: "#10b981",
-          gold: "#fbbf24",
-          amber: "#f59e0b",
-          charcoal: "#0f172a",
-          surface: "#112217",
-          card: "#0d1f14",
-          border: "#1b3827"
+          dark: "#111827",
+          forest: "#EA2B2B",
+          emerald: "#DC2626",
+          mint: "#EA2B2B",
+          gold: "#EA2B2B",
+          amber: "#F97316",
+          charcoal: "#1F2937",
+          surface: "#FFFFFF",
+          card: "#FFFFFF",
+          border: "#E7E5DC"
         }
       },
       fontFamily: {

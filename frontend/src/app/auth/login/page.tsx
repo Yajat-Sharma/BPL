@@ -48,7 +48,10 @@ export default function LoginPage() {
     setError(null);
     setLoading(true);
     try {
-      const gEmail = prompt("Enter your Google Account email (e.g. yourname@gmail.com):", "cricket.player@gmail.com");
+      const gEmail = prompt(
+        "Enter your Google Account email (e.g. yourname@gmail.com):",
+        "cricket.player@gmail.com"
+      );
       if (!gEmail) {
         setLoading(false);
         return;
@@ -129,27 +132,27 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-[75vh] flex items-center justify-center px-4 py-12">
-      <div className="emerald-card max-w-md w-full rounded-2xl p-8 border border-bpl-emerald/50 shadow-2xl relative space-y-6">
+      <div className="bg-white max-w-md w-full rounded-3xl p-8 border border-stone-200 shadow-xl relative space-y-6">
         <div className="text-center">
-          <div className="w-12 h-12 rounded-xl bg-bpl-forest flex items-center justify-center mx-auto border border-bpl-gold/40 shadow-lg mb-3">
-            <Trophy className="w-6 h-6 text-bpl-gold" />
+          <div className="w-12 h-12 rounded-2xl bg-red-600 flex items-center justify-center mx-auto text-white shadow-md shadow-red-500/20 mb-3">
+            <span className="text-2xl">🏏</span>
           </div>
-          <h1 className="text-2xl font-black uppercase text-white tracking-wide">
-            Gully Cricket Login
+          <h1 className="text-2xl font-black uppercase text-stone-900 tracking-tight">
+            CRIC<span className="text-red-600">LIVE</span> Access
           </h1>
-          <p className="text-xs text-slate-400 mt-1">
-            Choose instant guest access or sign in to save your match records.
+          <p className="text-xs text-stone-500 mt-1">
+            Play or score as a guest instantly, or sign in to track your matches.
           </p>
         </div>
 
         {error && (
-          <div className="p-3 rounded-xl bg-red-950/50 border border-red-800/50 text-red-300 text-xs font-semibold">
+          <div className="p-3 rounded-2xl bg-red-50 border border-red-200 text-red-700 text-xs font-semibold">
             {error}
           </div>
         )}
 
         {debugOtp && (
-          <div className="p-3 rounded-xl bg-amber-950/60 border border-amber-800/50 text-amber-300 text-xs font-mono">
+          <div className="p-3 rounded-2xl bg-amber-50 border border-amber-200 text-amber-800 text-xs font-mono">
             <strong>Development OTP:</strong> {debugOtp} (or use bypass <code>999999</code>)
           </div>
         )}
@@ -160,16 +163,16 @@ export default function LoginPage() {
             type="button"
             onClick={handleGuestLogin}
             disabled={loading}
-            className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-bpl-gold via-yellow-400 to-amber-500 text-slate-950 font-black text-sm uppercase tracking-wider hover:from-yellow-400 hover:to-amber-400 transition-all flex items-center justify-center gap-2 shadow-lg hover:shadow-yellow-500/20"
+            className="w-full py-3.5 px-4 rounded-2xl bg-red-600 hover:bg-red-700 text-white font-black text-sm uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-md shadow-red-500/20"
           >
-            <Zap className="w-4 h-4 fill-slate-950" /> Play & Score as Guest (1-Click)
+            <Zap className="w-4 h-4 fill-white" /> Play & Score as Guest (1-Click)
           </button>
 
           <button
             type="button"
             onClick={handleGoogleLogin}
             disabled={loading}
-            className="w-full py-3 px-4 rounded-xl bg-white hover:bg-slate-100 text-slate-900 font-bold text-sm transition-all flex items-center justify-center gap-2.5 shadow"
+            className="w-full py-3 px-4 rounded-2xl bg-white hover:bg-stone-50 text-stone-800 border border-stone-200 font-bold text-sm transition-all flex items-center justify-center gap-2.5 shadow-sm"
           >
             <svg className="w-4 h-4" viewBox="0 0 24 24">
               <path
@@ -195,17 +198,17 @@ export default function LoginPage() {
 
         {/* Divider */}
         <div className="relative flex py-1 items-center">
-          <div className="flex-grow border-t border-[#1b3827]"></div>
-          <span className="flex-shrink mx-4 text-xs font-bold text-slate-500 uppercase">
+          <div className="flex-grow border-t border-stone-200"></div>
+          <span className="flex-shrink mx-4 text-xs font-bold text-stone-400 uppercase">
             Or With Email
           </span>
-          <div className="flex-grow border-t border-[#1b3827]"></div>
+          <div className="flex-grow border-t border-stone-200"></div>
         </div>
 
         {step === "EMAIL" ? (
           <form onSubmit={handleSendOTP} className="space-y-4">
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1.5">
+              <label className="block text-xs font-bold uppercase tracking-wider text-stone-600 mb-1.5">
                 Email Address
               </label>
               <div className="relative">
@@ -215,16 +218,16 @@ export default function LoginPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="name@gmail.com"
-                  className="w-full bg-[#06130d] border border-[#1b3827] focus:border-bpl-gold rounded-xl px-4 py-3 text-sm text-white focus:outline-none pl-10"
+                  className="w-full bg-stone-50 border border-stone-200 focus:border-red-600 rounded-xl px-4 py-3 text-sm text-stone-900 focus:outline-none pl-10"
                 />
-                <Mail className="w-4 h-4 text-slate-500 absolute left-3.5 top-3.5" />
+                <Mail className="w-4 h-4 text-stone-400 absolute left-3.5 top-3.5" />
               </div>
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 rounded-xl bg-[#112217] hover:bg-[#1b3827] text-white font-bold text-sm border border-[#1b3827] hover:border-bpl-gold/40 transition-all flex items-center justify-center gap-2"
+              className="w-full py-3 rounded-2xl bg-stone-900 hover:bg-black text-white font-bold text-sm transition-all flex items-center justify-center gap-2 shadow-sm"
             >
               {loading ? "Sending OTP..." : "Send Verification OTP"}
               <ArrowRight className="w-4 h-4" />
@@ -233,7 +236,7 @@ export default function LoginPage() {
         ) : (
           <form onSubmit={handleVerifyOTP} className="space-y-4">
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1.5">
+              <label className="block text-xs font-bold uppercase tracking-wider text-stone-600 mb-1.5">
                 Enter 6-Digit OTP
               </label>
               <div className="relative">
@@ -244,18 +247,18 @@ export default function LoginPage() {
                   value={otp}
                   onChange={(e) => setOtp(e.target.value)}
                   placeholder="123456"
-                  className="w-full bg-[#06130d] border border-[#1b3827] focus:border-bpl-gold rounded-xl px-4 py-3 text-lg font-mono text-center tracking-widest text-white focus:outline-none pl-10"
+                  className="w-full bg-stone-50 border border-stone-200 focus:border-red-600 rounded-xl px-4 py-3 text-lg font-mono text-center tracking-widest text-stone-900 focus:outline-none pl-10"
                 />
-                <KeyRound className="w-4 h-4 text-slate-500 absolute left-3.5 top-4" />
+                <KeyRound className="w-4 h-4 text-stone-400 absolute left-3.5 top-4" />
               </div>
-              <p className="text-[11px] text-slate-400 mt-1">
+              <p className="text-[11px] text-stone-500 mt-1">
                 Sent to <strong>{email}</strong>
               </p>
             </div>
 
             {isNewUser && (
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1.5">
+                <label className="block text-xs font-bold uppercase tracking-wider text-stone-600 mb-1.5">
                   Full Name / Username
                 </label>
                 <div className="relative">
@@ -265,9 +268,9 @@ export default function LoginPage() {
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     placeholder="e.g. Rahul Sharma"
-                    className="w-full bg-[#06130d] border border-[#1b3827] focus:border-bpl-gold rounded-xl px-4 py-3 text-sm text-white focus:outline-none pl-10"
+                    className="w-full bg-stone-50 border border-stone-200 focus:border-red-600 rounded-xl px-4 py-3 text-sm text-stone-900 focus:outline-none pl-10"
                   />
-                  <UserIcon className="w-4 h-4 text-slate-500 absolute left-3.5 top-3.5" />
+                  <UserIcon className="w-4 h-4 text-stone-400 absolute left-3.5 top-3.5" />
                 </div>
               </div>
             )}
@@ -275,7 +278,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 rounded-xl bg-gradient-to-r from-bpl-gold to-yellow-500 text-slate-950 font-bold text-sm hover:from-yellow-400 hover:to-amber-400 transition-all flex items-center justify-center gap-2 shadow"
+              className="w-full py-3 rounded-2xl bg-red-600 hover:bg-red-700 text-white font-bold text-sm transition-all flex items-center justify-center gap-2 shadow-md shadow-red-500/20"
             >
               {loading ? "Verifying..." : "Verify OTP & Sign In"}
               <ArrowRight className="w-4 h-4" />
@@ -287,7 +290,7 @@ export default function LoginPage() {
                 setStep("EMAIL");
                 setError(null);
               }}
-              className="w-full text-center text-xs text-slate-400 hover:text-white py-1"
+              className="w-full text-center text-xs text-stone-500 hover:text-stone-800 py-1"
             >
               Change Email Address
             </button>

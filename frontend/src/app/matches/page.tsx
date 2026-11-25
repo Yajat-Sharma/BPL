@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Calendar, Radio, Trophy, Clock, CheckCircle2, MapPin } from "lucide-react";
+import { Calendar, Radio, Trophy, Clock, CheckCircle2, MapPin, Share2 } from "lucide-react";
 import { api } from "@/lib/api";
 import { Match } from "@/types";
+import { ShareMatchButton } from "@/components/ShareMatchButton";
 
 export default function MatchesPage() {
   const [matches, setMatches] = useState<Match[]>([]);
@@ -33,27 +34,29 @@ export default function MatchesPage() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#1b3827] pb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-stone-200 pb-6">
         <div>
-          <h1 className="text-3xl font-black uppercase text-white flex items-center gap-3">
-            <Calendar className="w-8 h-8 text-bpl-gold" />
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-50 border border-red-200 text-red-600 text-xs font-bold uppercase tracking-wider mb-2">
+            <Calendar className="w-3.5 h-3.5" /> CRICLIVE Schedule
+          </div>
+          <h1 className="text-3xl font-black uppercase text-stone-900 tracking-tight flex items-center gap-3">
             Tournament Fixtures
           </h1>
-          <p className="text-sm text-slate-400 mt-1">
-            Complete schedule, live games, and past match results for BPL 2026.
+          <p className="text-sm text-stone-500 mt-1">
+            Complete schedule, live games, and past match results.
           </p>
         </div>
 
         {/* Filter Pills */}
-        <div className="flex items-center gap-1.5 bg-[#06130d] p-1.5 rounded-xl border border-[#1b3827]">
+        <div className="flex items-center gap-1 bg-white p-1.5 rounded-2xl border border-stone-200 shadow-sm">
           {(["ALL", "LIVE", "UPCOMING", "COMPLETED"] as const).map((tab) => (
             <button
               key={tab}
               onClick={() => setFilter(tab)}
-              className={`px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider rounded-lg transition-colors ${
+              className={`px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider rounded-xl transition-all ${
                 filter === tab
-                  ? "bg-bpl-forest text-white border border-bpl-gold/30 shadow-sm"
-                  : "text-slate-400 hover:text-white"
+                  ? "bg-red-600 text-white shadow-sm"
+                  : "text-stone-500 hover:text-stone-900 hover:bg-stone-50"
               }`}
             >
               {tab}
@@ -67,19 +70,19 @@ export default function MatchesPage() {
         {filteredMatches.map((m) => (
           <div
             key={m.id}
-            className="emerald-card rounded-2xl p-6 border border-[#1b3827] hover:border-bpl-emerald/50 transition-all flex flex-col justify-between"
+            className="bg-white rounded-3xl p-6 border border-stone-200 shadow-sm hover:shadow-md transition-all flex flex-col justify-between space-y-4"
           >
             <div>
               {/* Header Badge */}
-              <div className="flex justify-between items-center text-xs font-bold uppercase mb-4">
-                <span className="font-mono text-bpl-gold">{m.match_number}</span>
+              <div className="flex justify-between items-center text-xs font-bold uppercase mb-3">
+                <span className="font-mono text-stone-500 font-bold">{m.match_number}</span>
                 <span
-                  className={`px-2 py-0.5 rounded text-[10px] font-black tracking-wider ${
+                  className={`px-2.5 py-0.5 rounded-full text-[10px] font-black tracking-wider ${
                     m.status === "LIVE"
                       ? "bg-red-600 text-white animate-pulse"
                       : m.status === "COMPLETED"
-                      ? "bg-emerald-950/60 text-emerald-400 border border-emerald-800/40"
-                      : "bg-[#112217] text-slate-400 border border-[#1b3827]"
+                      ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                      : "bg-stone-100 text-stone-600"
                   }`}
                 >
                   {m.status}
@@ -88,64 +91,69 @@ export default function MatchesPage() {
 
               {/* Match Description */}
               {m.description && (
-                <p className="text-xs text-slate-400 font-medium mb-3 line-clamp-1">
+                <p className="text-xs text-stone-400 font-medium mb-3 line-clamp-1">
                   {m.description}
                 </p>
               )}
 
               {/* Teams Display */}
-              <div className="space-y-3 py-2 border-y border-[#1b3827]/60">
+              <div className="space-y-2 py-3 border-y border-stone-100">
                 <div className="flex items-center justify-between">
-                  <span className="font-bold text-base text-white">{m.team_a.name}</span>
-                  <span className="text-xs font-mono font-bold text-slate-400">{m.team_a.short_code}</span>
+                  <span className="font-black text-base text-stone-900">{m.team_a.name}</span>
+                  <span className="text-xs font-mono font-bold text-stone-400">{m.team_a.short_code}</span>
                 </div>
-                <div className="flex items-center justify-center">
-                  <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 bg-[#06130d] px-2 py-0.5 rounded border border-[#1b3827]">
-                    VS
-                  </span>
-                </div>
+                <div className="text-[10px] text-stone-400 font-black uppercase text-center">VS</div>
                 <div className="flex items-center justify-between">
-                  <span className="font-bold text-base text-white">{m.team_b.name}</span>
-                  <span className="text-xs font-mono font-bold text-slate-400">{m.team_b.short_code}</span>
+                  <span className="font-black text-base text-stone-900">{m.team_b.name}</span>
+                  <span className="text-xs font-mono font-bold text-stone-400">{m.team_b.short_code}</span>
                 </div>
               </div>
 
-              {/* Result Summary */}
+              {/* Venue & Date */}
+              <div className="mt-3 space-y-1 text-xs text-stone-500">
+                <div className="flex items-center gap-1.5 truncate">
+                  <MapPin className="w-3.5 h-3.5 text-stone-400 flex-shrink-0" />
+                  <span className="truncate">{m.venue}</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <Clock className="w-3.5 h-3.5 text-stone-400 flex-shrink-0" />
+                  <span>
+                    {new Date(m.match_date).toLocaleDateString([], {
+                      month: "short",
+                      day: "numeric",
+                    })}{" "}
+                    at{" "}
+                    {new Date(m.match_date).toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </span>
+                </div>
+              </div>
+
+              {/* Win Margin if Completed */}
               {m.win_margin && (
-                <div className="mt-3 text-xs font-bold text-bpl-mint flex items-center gap-1.5">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-bpl-gold" /> {m.win_margin}
+                <div className="mt-3 p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold flex items-center gap-1.5">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
+                  <span className="truncate">{m.win_margin}</span>
                 </div>
               )}
             </div>
 
-            {/* Match Timing & Venue Footer */}
-            <div className="mt-5 pt-4 border-t border-[#1b3827] flex flex-col gap-2">
-              <div className="flex items-center justify-between text-xs text-slate-400">
-                <span className="flex items-center gap-1 truncate">
-                  <MapPin className="w-3.5 h-3.5 text-bpl-mint" /> {m.venue}
-                </span>
-                <span className="font-mono text-slate-300">
-                  {new Date(m.match_date).toLocaleDateString([], { month: "short", day: "numeric" })}
-                </span>
-              </div>
+            {/* Bottom Actions: View Live + Share */}
+            <div className="pt-3 border-t border-stone-100 flex items-center justify-between gap-2">
+              <Link
+                href={m.status === "LIVE" ? `/live/${m.id}` : `/live/${m.id}`}
+                className="inline-flex items-center gap-1 text-xs font-bold text-red-600 hover:text-red-700 uppercase tracking-wider"
+              >
+                {m.status === "LIVE" ? "Watch Live →" : "View Scorecard →"}
+              </Link>
 
-              <div className="pt-2 flex gap-2">
-                <Link
-                  href={`/live/${m.id}`}
-                  className="flex-1 text-center py-2 rounded-lg bg-bpl-forest hover:bg-bpl-emerald text-white text-xs font-bold uppercase tracking-wider transition-colors"
-                >
-                  {m.status === "LIVE" ? "Watch Live" : "View Match Details"}
-                </Link>
-                {m.status === "LIVE" && (
-                  <Link
-                    href={`/admin/score/${m.id}`}
-                    className="px-3 py-2 rounded-lg bg-bpl-gold text-slate-950 text-xs font-bold uppercase tracking-wider hover:bg-yellow-400 transition-colors"
-                    title="Open Admin Scorer"
-                  >
-                    Score
-                  </Link>
-                )}
-              </div>
+              <ShareMatchButton
+                matchId={m.id}
+                matchTitle={`${m.team_a.name} vs ${m.team_b.name}`}
+                variant="icon"
+              />
             </div>
           </div>
         ))}

@@ -7,8 +7,8 @@ import { Footer } from "@/components/Footer";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Bairajeshwar Premier League (BPL) - Official Live Tournament Center",
-  description: "Live cricket scoring, real-time commentary, fixtures, teams and points standings for Bairajeshwar Premier League.",
+  title: "CRICLIVE - Live Cricket Scorer & Match Center",
+  description: "Live ball-by-ball cricket scoring, real-time match streaming, box & turf tournament management.",
 };
 
 export default function RootLayout({
@@ -18,7 +18,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.className} bg-[#06130d] text-slate-100 min-h-screen flex flex-col`}>
+      <body className={`${inter.className} bg-[#F5F4EF] text-slate-900 min-h-screen flex flex-col antialiased`}>
         <Navbar />
         <main className="flex-1">
           {children}

@@ -42,7 +42,8 @@ export default function AdminSettingsPage() {
 
         if (d.players_per_team !== undefined) setPlayersPerTeam(d.players_per_team);
         if (d.max_wickets !== undefined) setMaxWickets(d.max_wickets);
-        if (d.allow_last_man_batting !== undefined) setAllowLastManBatting(d.allow_last_man_batting);
+        if (d.allow_last_man_batting !== undefined)
+          setAllowLastManBatting(d.allow_last_man_batting);
         if (d.wide_runs !== undefined) setWideRuns(d.wide_runs);
         if (d.no_ball_runs !== undefined) setNoBallRuns(d.no_ball_runs);
         if (d.no_ball_reball !== undefined) setNoBallReball(d.no_ball_reball);
@@ -50,7 +51,8 @@ export default function AdminSettingsPage() {
         if (d.roof_net_hit_rule !== undefined) setRoofNetHitRule(d.roof_net_hit_rule);
         if (d.direct_hit_wall_rule !== undefined) setDirectHitWallRule(d.direct_hit_wall_rule);
         if (d.allow_lbw !== undefined) setAllowLbw(d.allow_lbw);
-        if (d.over_limit_per_bowler !== undefined) setOverLimitPerBowler(d.over_limit_per_bowler);
+        if (d.over_limit_per_bowler !== undefined)
+          setOverLimitPerBowler(d.over_limit_per_bowler);
       } catch (err) {
         console.error(err);
       }
@@ -92,37 +94,40 @@ export default function AdminSettingsPage() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-10 space-y-8">
-      <div className="border-b border-[#1b3827] pb-6">
-        <h1 className="text-3xl font-black uppercase text-white flex items-center gap-3">
-          <Settings className="w-8 h-8 text-bpl-gold" />
-          Box Cricket Rules & Tournament Settings
+      <div className="border-b border-stone-200 pb-6">
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-50 border border-red-200 text-red-600 text-xs font-bold uppercase tracking-wider mb-2">
+          <Settings className="w-3.5 h-3.5" /> CRICLIVE Engine Settings
+        </div>
+        <h1 className="text-3xl font-black uppercase text-stone-900 tracking-tight flex items-center gap-3">
+          Tournament & Box Cricket Regulations
         </h1>
-        <p className="text-sm text-slate-400 mt-1">
-          Customize box cricket match rules: player count, wickets allowed, net/roof contact penalties, wide/no-ball runs and bowler quotas.
+        <p className="text-sm text-stone-500 mt-1">
+          Customize box cricket match rules: player count, wickets allowed, net/roof contact
+          penalties, wide/no-ball runs and bowler quotas.
         </p>
       </div>
 
       {message && (
-        <div className="p-4 rounded-xl bg-emerald-950/50 border border-emerald-800/50 text-emerald-300 text-xs font-semibold flex items-center gap-2">
-          <CheckCircle2 className="w-4 h-4 text-emerald-400" /> {message}
+        <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold flex items-center gap-2">
+          <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" /> {message}
         </div>
       )}
 
       <form onSubmit={handleSave} className="space-y-8">
         {/* BOX CRICKET SPECIFIC CONFIGURATION */}
-        <div className="emerald-card rounded-2xl p-6 sm:p-8 border border-bpl-gold/40 space-y-6">
-          <div className="flex items-center justify-between border-b border-[#1b3827] pb-3">
-            <h2 className="text-lg font-black uppercase text-bpl-gold">
+        <div className="bg-white rounded-3xl p-6 sm:p-8 border border-stone-200 shadow-sm space-y-6">
+          <div className="flex items-center justify-between border-b border-stone-100 pb-3">
+            <h2 className="text-sm font-black uppercase text-red-600 tracking-wider">
               🏏 Box Cricket Match Regulations
             </h2>
-            <span className="text-xs bg-bpl-gold/10 text-bpl-gold px-2.5 py-1 rounded font-bold">
+            <span className="text-[11px] bg-red-50 text-red-700 border border-red-200 px-2.5 py-0.5 rounded-full font-bold">
               Active Engine Rules
             </span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
             <div>
-              <label className="block text-xs font-bold uppercase text-slate-300 mb-1.5">
+              <label className="block text-xs font-bold uppercase text-stone-600 mb-1.5">
                 Players per Team
               </label>
               <input
@@ -131,13 +136,13 @@ export default function AdminSettingsPage() {
                 max={15}
                 value={playersPerTeam}
                 onChange={(e) => setPlayersPerTeam(parseInt(e.target.value) || 8)}
-                className="w-full bg-[#06130d] border border-[#1b3827] focus:border-bpl-gold rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none font-mono"
+                className="w-full bg-stone-50 border border-stone-200 focus:border-red-600 rounded-xl px-3 py-2.5 text-xs text-stone-900 focus:outline-none font-mono font-bold"
               />
-              <p className="text-[10px] text-slate-500 mt-1">Standard box cricket is 6 to 8 players</p>
+              <p className="text-[10px] text-stone-400 mt-1">Standard box cricket is 6 to 8 players</p>
             </div>
 
             <div>
-              <label className="block text-xs font-bold uppercase text-slate-300 mb-1.5">
+              <label className="block text-xs font-bold uppercase text-stone-600 mb-1.5">
                 Wickets Allowed to Fall
               </label>
               <input
@@ -146,34 +151,34 @@ export default function AdminSettingsPage() {
                 max={14}
                 value={maxWickets}
                 onChange={(e) => setMaxWickets(parseInt(e.target.value) || 7)}
-                className="w-full bg-[#06130d] border border-[#1b3827] focus:border-bpl-gold rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none font-mono"
+                className="w-full bg-stone-50 border border-stone-200 focus:border-red-600 rounded-xl px-3 py-2.5 text-xs text-stone-900 focus:outline-none font-mono font-bold"
               />
-              <p className="text-[10px] text-slate-500 mt-1">e.g. 7 wickets = team all out</p>
+              <p className="text-[10px] text-stone-400 mt-1">e.g. 7 wickets = team all out</p>
             </div>
 
             <div>
-              <label className="block text-xs font-bold uppercase text-slate-300 mb-1.5">
+              <label className="block text-xs font-bold uppercase text-stone-600 mb-1.5">
                 Max Overs Per Bowler
               </label>
               <input
                 type="number"
                 min={1}
-                max={5}
+                max={10}
                 value={overLimitPerBowler}
                 onChange={(e) => setOverLimitPerBowler(parseInt(e.target.value) || 2)}
-                className="w-full bg-[#06130d] border border-[#1b3827] focus:border-bpl-gold rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none font-mono"
+                className="w-full bg-stone-50 border border-stone-200 focus:border-red-600 rounded-xl px-3 py-2.5 text-xs text-stone-900 focus:outline-none font-mono font-bold"
               />
-              <p className="text-[10px] text-slate-500 mt-1">Quota limit per player</p>
+              <p className="text-[10px] text-stone-400 mt-1">Quota limit per bowler</p>
             </div>
 
             <div>
-              <label className="block text-xs font-bold uppercase text-slate-300 mb-1.5">
+              <label className="block text-xs font-bold uppercase text-stone-600 mb-1.5">
                 Wide Ball Penalty
               </label>
               <select
                 value={wideRuns}
                 onChange={(e) => setWideRuns(parseInt(e.target.value))}
-                className="w-full bg-[#06130d] border border-[#1b3827] focus:border-bpl-gold rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none"
+                className="w-full bg-stone-50 border border-stone-200 focus:border-red-600 rounded-xl px-3 py-2.5 text-xs text-stone-900 font-semibold focus:outline-none"
               >
                 <option value={1}>1 Run Penalty</option>
                 <option value={2}>2 Runs Penalty</option>
@@ -182,13 +187,13 @@ export default function AdminSettingsPage() {
             </div>
 
             <div>
-              <label className="block text-xs font-bold uppercase text-slate-300 mb-1.5">
+              <label className="block text-xs font-bold uppercase text-stone-600 mb-1.5">
                 No-Ball Penalty
               </label>
               <select
                 value={noBallRuns}
                 onChange={(e) => setNoBallRuns(parseInt(e.target.value))}
-                className="w-full bg-[#06130d] border border-[#1b3827] focus:border-bpl-gold rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none"
+                className="w-full bg-stone-50 border border-stone-200 focus:border-red-600 rounded-xl px-3 py-2.5 text-xs text-stone-900 font-semibold focus:outline-none"
               >
                 <option value={1}>1 Run + Free Hit</option>
                 <option value={2}>2 Runs Penalty</option>
@@ -197,64 +202,49 @@ export default function AdminSettingsPage() {
             </div>
 
             <div>
-              <label className="block text-xs font-bold uppercase text-slate-300 mb-1.5">
-                Roof / Top Net Hit Rule
+              <label className="block text-xs font-bold uppercase text-stone-600 mb-1.5">
+                Roof Net Contact Rule
               </label>
               <select
                 value={roofNetHitRule}
                 onChange={(e) => setRoofNetHitRule(e.target.value)}
-                className="w-full bg-[#06130d] border border-[#1b3827] focus:border-bpl-gold rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none"
+                className="w-full bg-stone-50 border border-stone-200 focus:border-red-600 rounded-xl px-3 py-2.5 text-xs text-stone-900 font-semibold focus:outline-none"
               >
-                <option value="DEAD_BALL">Dead Ball (No runs, no ball count)</option>
-                <option value="RUNS_1">Award 1 Run</option>
+                <option value="DEAD_BALL">Dead Ball (Re-bowl)</option>
+                <option value="RUNS_1">Award 1 Run (1D Net)</option>
                 <option value="RUNS_2">Award 2 Runs</option>
-                <option value="OUT">Declared OUT</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold uppercase text-slate-300 mb-1.5">
-                Direct Back Wall Strike
-              </label>
-              <select
-                value={directHitWallRule}
-                onChange={(e) => setDirectHitWallRule(e.target.value)}
-                className="w-full bg-[#06130d] border border-[#1b3827] focus:border-bpl-gold rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none"
-              >
-                <option value="RUNS_4">Automatic 4 Runs</option>
-                <option value="RUNS_6">Automatic 6 Runs</option>
-                <option value="RUN_PHYSICALLY">Must run physically</option>
+                <option value="OUT_IF_CAUGHT">Out If Caught off Net</option>
               </select>
             </div>
           </div>
 
-          <div className="pt-2 flex flex-wrap gap-6 border-t border-[#1b3827]">
-            <label className="flex items-center gap-2 text-xs text-slate-300 font-semibold cursor-pointer">
+          <div className="pt-2 border-t border-stone-100 flex flex-wrap gap-6">
+            <label className="flex items-center gap-2 text-xs text-stone-700 font-semibold cursor-pointer">
               <input
                 type="checkbox"
                 checked={allowLastManBatting}
                 onChange={(e) => setAllowLastManBatting(e.target.checked)}
-                className="rounded border-[#1b3827] bg-[#06130d] text-bpl-gold focus:ring-0"
+                className="rounded border-stone-300 text-red-600 focus:ring-red-500"
               />
-              Allow Last Man to Bat Alone
+              Allow Last Man Standing Batting
             </label>
 
-            <label className="flex items-center gap-2 text-xs text-slate-300 font-semibold cursor-pointer">
+            <label className="flex items-center gap-2 text-xs text-stone-700 font-semibold cursor-pointer">
               <input
                 type="checkbox"
                 checked={allowLbw}
                 onChange={(e) => setAllowLbw(e.target.checked)}
-                className="rounded border-[#1b3827] bg-[#06130d] text-bpl-gold focus:ring-0"
+                className="rounded border-stone-300 text-red-600 focus:ring-red-500"
               />
               Enable LBW Dismissals (Default: Off)
             </label>
 
-            <label className="flex items-center gap-2 text-xs text-slate-300 font-semibold cursor-pointer">
+            <label className="flex items-center gap-2 text-xs text-stone-700 font-semibold cursor-pointer">
               <input
                 type="checkbox"
                 checked={noBallReball}
                 onChange={(e) => setNoBallReball(e.target.checked)}
-                className="rounded border-[#1b3827] bg-[#06130d] text-bpl-gold focus:ring-0"
+                className="rounded border-stone-300 text-red-600 focus:ring-red-500"
               />
               Re-bowl No Balls
             </label>
@@ -262,14 +252,14 @@ export default function AdminSettingsPage() {
         </div>
 
         {/* GENERAL TOURNAMENT SETTINGS */}
-        <div className="emerald-card rounded-2xl p-6 sm:p-8 border border-bpl-emerald/40 space-y-4">
-          <h2 className="text-sm font-bold uppercase tracking-wider text-white">
+        <div className="bg-white rounded-3xl p-6 sm:p-8 border border-stone-200 shadow-sm space-y-4">
+          <h2 className="text-sm font-black uppercase tracking-wider text-stone-900">
             General Tournament Config
           </h2>
 
           <div className="space-y-4">
             <div>
-              <label className="block text-xs font-bold uppercase text-slate-400 mb-1.5">
+              <label className="block text-xs font-bold uppercase text-stone-600 mb-1.5">
                 Tournament Name
               </label>
               <input
@@ -277,13 +267,13 @@ export default function AdminSettingsPage() {
                 required
                 value={tournamentName}
                 onChange={(e) => setTournamentName(e.target.value)}
-                className="w-full bg-[#06130d] border border-[#1b3827] focus:border-bpl-gold rounded-xl px-4 py-3 text-sm text-white focus:outline-none"
+                className="w-full bg-stone-50 border border-stone-200 focus:border-red-600 rounded-xl px-4 py-3 text-sm text-stone-900 font-semibold focus:outline-none"
               />
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-bold uppercase text-slate-400 mb-1.5">
+                <label className="block text-xs font-bold uppercase text-stone-600 mb-1.5">
                   Default Match Overs
                 </label>
                 <input
@@ -292,18 +282,18 @@ export default function AdminSettingsPage() {
                   max={100}
                   value={overs}
                   onChange={(e) => setOvers(parseInt(e.target.value) || 6)}
-                  className="w-full bg-[#06130d] border border-[#1b3827] focus:border-bpl-gold rounded-xl px-4 py-3 text-sm text-white focus:outline-none font-mono"
+                  className="w-full bg-stone-50 border border-stone-200 focus:border-red-600 rounded-xl px-4 py-3 text-sm text-stone-900 focus:outline-none font-mono font-bold"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase text-slate-400 mb-1.5">
+                <label className="block text-xs font-bold uppercase text-stone-600 mb-1.5">
                   Tournament Status
                 </label>
                 <select
                   value={status}
                   onChange={(e) => setStatus(e.target.value)}
-                  className="w-full bg-[#06130d] border border-[#1b3827] focus:border-bpl-gold rounded-xl px-4 py-3 text-sm text-white focus:outline-none"
+                  className="w-full bg-stone-50 border border-stone-200 focus:border-red-600 rounded-xl px-4 py-3 text-sm text-stone-900 font-semibold focus:outline-none"
                 >
                   <option value="UPCOMING">Upcoming Tournament</option>
                   <option value="LIVE">Live & In Progress</option>
@@ -318,7 +308,7 @@ export default function AdminSettingsPage() {
           <button
             type="submit"
             disabled={loading}
-            className="flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-bpl-gold to-yellow-500 text-slate-950 font-bold text-xs uppercase tracking-wider hover:from-yellow-400 transition-all shadow"
+            className="flex items-center gap-2 px-6 py-3.5 rounded-2xl bg-red-600 hover:bg-red-700 text-white font-black text-xs uppercase tracking-wider transition-all shadow-md"
           >
             <Save className="w-4 h-4" /> Save Regulations & Settings
           </button>
