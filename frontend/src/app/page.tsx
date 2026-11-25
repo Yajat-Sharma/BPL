@@ -57,11 +57,6 @@ export default function HomePage() {
       <section className="bg-white border-b border-stone-200 pt-10 pb-12 sm:pt-14 sm:pb-16 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col items-center text-center">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-50 border border-red-200 text-red-600 text-xs font-bold uppercase tracking-wider mb-4 shadow-sm">
-              <span className="w-2 h-2 rounded-full bg-red-600 animate-pulse" />
-              Live Cricket Streaming & Match Hub
-            </div>
-
             <h1 className="text-4xl sm:text-6xl font-black tracking-tight text-stone-900 uppercase max-w-4xl leading-tight">
               CRIC<span className="text-red-600">LIVE</span> MATCH SCORER
             </h1>
