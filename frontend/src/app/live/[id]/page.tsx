@@ -14,6 +14,8 @@ import {
   Share2,
   Users,
   Shield,
+  X,
+  Maximize2,
 } from "lucide-react";
 import { api } from "@/lib/api";
 import { useMatchSocket } from "@/lib/socket";
@@ -28,6 +30,7 @@ export default function LiveMatchDetailPage() {
   const [initialData, setInitialData] = useState<LiveMatchState | null>(null);
   const [fullScorecard, setFullScorecard] = useState<any | null>(null);
   const [activeTab, setActiveTab] = useState<"live" | "scorecard" | "commentary">("live");
+  const [showDetailModal, setShowDetailModal] = useState(false);
   const [loading, setLoading] = useState(true);
 
   // Hook up WebSocket with auto-reconnection and state sync
@@ -112,8 +115,16 @@ export default function LiveMatchDetailPage() {
         </div>
       </div>
 
-      {/* Primary Cricket Score Card (Matching Image 2 Design) */}
-      <div className="bg-white rounded-3xl p-6 sm:p-8 border border-stone-200 shadow-sm space-y-6 relative overflow-hidden">
+      {/* Primary Cricket Score Card (Compact, Clickable to Expand) */}
+      <div
+        onClick={() => setShowDetailModal(true)}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") setShowDetailModal(true);
+        }}
+        className="bg-white rounded-3xl p-6 sm:p-8 border border-stone-200 shadow-sm hover:shadow-md hover:border-red-300 transition-all space-y-6 relative overflow-hidden cursor-pointer group"
+      >
         {/* Card Header: Live Pill & Match Heading */}
         <div className="text-center space-y-1">
           <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-red-600 text-white font-black text-[11px] uppercase tracking-wider shadow-sm">
@@ -219,8 +230,61 @@ export default function LiveMatchDetailPage() {
           </div>
         </div>
 
-        {/* Navigation Tabs (Live, Scorecard, Commentary) */}
-        <div className="flex border-b border-stone-200 gap-8 pt-2">
+        {/* Tap to Expand Cue */}
+        <div className="pt-2 border-t border-stone-100 flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-wider text-red-600 group-hover:text-red-700">
+          <Maximize2 className="w-3.5 h-3.5" />
+          <span>Tap card for Live Scorecard & Ball Commentary</span>
+        </div>
+      </div>
+
+      {/* Big Pop-up Modal for Live Scorecard & Ball Commentary */}
+      {showDetailModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-6 bg-black/60 backdrop-blur-sm animate-in fade-in"
+          onClick={() => setShowDetailModal(false)}
+        >
+          <div
+            className="bg-white rounded-3xl w-full max-w-3xl max-h-[88vh] flex flex-col shadow-2xl border border-stone-200 overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Sticky Header */}
+            <div className="px-6 py-4 bg-stone-50 border-b border-stone-200 flex items-center justify-between gap-4">
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-600 text-white font-black text-[10px] uppercase tracking-wider">
+                    ● LIVE
+                  </span>
+                  <span className="text-xs font-bold text-stone-400 uppercase tracking-wider">
+                    {state.match_number}
+                  </span>
+                </div>
+                <h2 className="text-base sm:text-lg font-black uppercase text-stone-900 mt-0.5">
+                  {state.batting_team.name}{" "}
+                  <span className="text-red-600 font-mono">
+                    {state.total_runs}/{state.wickets}
+                  </span>{" "}
+                  <span className="text-stone-400 font-mono text-xs">
+                    ({state.overs} / {state.overs_per_innings} ov)
+                  </span>
+                  <span className="text-stone-400 mx-2 text-xs">vs</span>
+                  {state.bowling_team.name}
+                </h2>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setShowDetailModal(false)}
+                className="p-2 rounded-full bg-white border border-stone-200 text-stone-500 hover:text-stone-900 hover:bg-stone-100 transition-colors flex-shrink-0"
+                aria-label="Close popup"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Modal Scrollable Body */}
+            <div className="p-6 overflow-y-auto space-y-6">
+              {/* Navigation Tabs (Live, Scorecard, Commentary) */}
+              <div className="flex border-b border-stone-200 gap-8 sticky top-0 bg-white z-10 pt-1">
           <button
             onClick={() => setActiveTab("live")}
             className={`pb-3 text-xs font-black uppercase tracking-wider border-b-2 transition-all ${
@@ -478,7 +542,10 @@ export default function LiveMatchDetailPage() {
             )}
           </div>
         )}
-      </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* WhatsApp Share Card */}
       <div className="bg-emerald-50 border border-emerald-200/80 rounded-3xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm">
