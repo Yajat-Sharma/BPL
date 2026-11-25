@@ -19,7 +19,7 @@ import { api } from "@/lib/api";
 import { useMatchSocket } from "@/lib/socket";
 import { LiveMatchState } from "@/types";
 import { ThisOverDeliveries } from "@/components/ThisOverDeliveries";
-import { ShareMatchButton } from "@/components/ShareMatchButton";
+import { ShareMatchButton, WhatsAppIcon } from "@/components/ShareMatchButton";
 
 export default function LiveMatchDetailPage() {
   const params = useParams();
@@ -478,6 +478,30 @@ export default function LiveMatchDetailPage() {
             )}
           </div>
         )}
+      </div>
+
+      {/* WhatsApp Share Card */}
+      <div className="bg-emerald-50 border border-emerald-200/80 rounded-3xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm">
+        <div className="flex items-center gap-3.5">
+          <div className="w-11 h-11 rounded-2xl bg-[#25D366] text-white flex items-center justify-center flex-shrink-0 shadow-md">
+            <WhatsAppIcon className="w-6 h-6" />
+          </div>
+          <div>
+            <h4 className="text-sm font-black text-emerald-950">
+              Share Live Match on WhatsApp
+            </h4>
+            <p className="text-xs text-emerald-800">
+              Send real-time score updates to your cricket friends & group chats in 1 click.
+            </p>
+          </div>
+        </div>
+        <ShareMatchButton
+          matchId={matchId}
+          matchTitle={`${state.batting_team.name} vs ${state.bowling_team.name}`}
+          scoreText={`${state.total_runs}/${state.wickets}`}
+          oversText={`${state.overs} ov`}
+          variant="primary"
+        />
       </div>
     </div>
   );
